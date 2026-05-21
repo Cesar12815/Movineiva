@@ -1,0 +1,18 @@
+{
+  "appId": "com.movineva.app",
+  "appName": "Movineva",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true,
+    "allowNavigation": [
+      "10.0.2.2",
+      "175.100.24.243"
+    ]
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

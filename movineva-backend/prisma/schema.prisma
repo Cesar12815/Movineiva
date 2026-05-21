@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Route {
+  id            String         @id @default(uuid())
+  lineNumber    String         @unique
+  name          String
+  color         String
+  serviceType   ServiceType    @default(CORRIENTE)
+  fare          Decimal        @db.Decimal(10, 2)
+  nightFare     Decimal?       @db.Decimal(10, 2)
+  frequency     Int
+  isActive      Boolean        @default(true)
+  polyline      Json
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  favorites     Favorite[]
+  notifications Notification[]
+  stops         RouteStop[]
+
+  @@index([lineNumber])
+  @@index([isActive])
+  @@map("routes")
+}
+
+model Stop {
+  id        String      @id @default(uuid())
+  name      String
+  latitude  Float
+  longitude Float
+  address   String?
+  zone      String?
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  routes    RouteStop[]
+
+  @@index([latitude, longitude])
+  @@index([zone])
+  @@map("stops")
+}
+
+model RouteStop {
+  id        String  @id @default(uuid())
+  routeId   String
+  stopId    String
+  order     Int
+  isKeyStop Boolean @default(false)
+  route     Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stop      Stop    @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, stopId])
+  @@index([routeId])
+  @@index([stopId])
+  @@map("route_stops")
+}
+
+model Favorite {
+  id        String        @id @default(uuid())
+  deviceId  String
+  siteId    String?
+  routeId   String?
+  createdAt DateTime      @default(now())
+  site      CustomerSite? @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  route     Route?        @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, siteId])
+  @@unique([deviceId, routeId])
+  @@index([deviceId])
+  @@map("favorites")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  deviceId    String
+  routeId     String
+  fcmToken    String
+  scheduledAt DateTime
+  daysOfWeek  Int[]
+  isActive    Boolean   @default(true)
+  lastSentAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  route       Route     @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([scheduledAt])
+  @@map("notifications")
+}
+
+model Report {
+  id          String       @id @default(uuid())
+  deviceId    String
+  latitude    Float?
+  longitude   Float?
+  sessionId   String
+  type        ReportType   @default(TRAFFIC)
+  description String
+  status      ReportStatus @default(PENDING)
+  resolvedAt  DateTime?
+  adminNotes  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([deviceId, sessionId])
+  @@index([status])
+  @@map("reports")
+}
+
+model DatasetVersion {
+  id          String   @id @default(uuid())
+  version     String   @unique
+  publishedAt DateTime @default(now())
+  description String?
+  isActive    Boolean  @default(true)
+
+  @@map("dataset_versions")
+}
+
+model Fare {
+  id          String      @id @default(uuid())
+  serviceType ServiceType @unique
+  amount      Decimal     @db.Decimal(10, 2)
+  effectiveAt DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("fares")
+}
+
+model CustomerSite {
+  id           String   @id @default(uuid())
+  customerName String
+  latitude     Float
+  longitude    Float
+  photoUrl     String?
+  address      String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  favorites    Favorite[]
+
+  @@map("customer_sites")
+}
+
+model DeliveryTracking {
+  id         String   @id @default(uuid())
+  deliveryId String   @unique
+  latitude   Float
+  longitude  Float
+  status     String   @default("active")
+  lastUpdate DateTime @default(now())
+
+  @@map("delivery_tracking")
+}
+
+model DeliveriesCompleted {
+  id           String   @id @default(uuid())
+  deviceId     String
+  customerName String
+  amount       Decimal  @db.Decimal(10, 2)
+  completedAt  DateTime @default(now())
+  address      String?
+  notes        String?
+
+  @@index([deviceId])
+  @@index([completedAt])
+  @@map("deliveries_completed")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  DRIVER
+  ADMIN
+}
+
+enum ServiceType {
+  CORRIENTE
+  EJECUTIVO
+  NOCTURNO
+}
+
+enum ReportType {
+  TRAFFIC
+  POLICE
+  DANGER
+  ROAD_BLOCK
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
