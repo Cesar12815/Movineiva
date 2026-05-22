@@ -1,58 +1,59 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const prisma = new PrismaClient();
+
+// Inicialización de Prisma con manejo de errores de URL
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL ? process.env.DATABASE_URL.replace('postgresql://', 'postgres://') : undefined
+    },
+  },
+});
 
 exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      return res.status(400).json({ success: false, message: 'Faltan campos obligatorios' });
+      return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
     }
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Verificación de conexión
+    // 1. Verificar conexión
     try {
       await prisma.$connect();
-    } catch (dbError) {
-      return res.status(500).json({ success: false, message: 'No hay conexión con la base de datos', error: dbError.message });
+    } catch (err) {
+      console.error('❌ Error de conexión DB:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'El servidor no puede conectar con la base de datos',
+        error: err.message
+      });
     }
 
-    // 2. ¿Ya existe?
+    // 2. Verificar si existe
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
     }
 
-    // 3. Encriptar
+    // 3. Crear usuario
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 4. CREAR (Aquí es donde falla)
-    const newUser = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: cleanEmail,
         password: hashedPassword,
-        name: name.trim(),
-        role: 'USER'
+        name: name.trim()
       }
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Usuario creado!',
-      user: { id: newUser.id, email: newUser.email }
-    });
+    res.status(201).json({ success: true, message: '¡Registro exitoso! Ya puedes iniciar sesión' });
 
   } catch (error) {
-    console.error('🔴 [FATAL_ERROR]:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error de raíz en el servidor',
-      detail: error.message,
-      code: error.code // Esto nos dará el código de Prisma (ej: P2002)
-    });
+    console.error('🔴 Error en Registro:', error);
+    res.status(500).json({ success: false, message: 'Error interno al registrar', detail: error.message });
   }
 };
 
@@ -68,7 +69,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || 'dev_secret',
+      process.env.JWT_SECRET || 'dev_secret_123',
       { expiresIn: '7d' }
     );
 
