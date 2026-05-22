@@ -1,0 +1,16 @@
+{
+  "name": "movineiva-global-monolith",
+  "version": "1.0.2",
+  "description": "Root package for MoviNeiva Global Deployment",
+  "scripts": {
+    "install-frontend": "npm install --prefix movineva-frontend",
+    "install-backend": "npm install --prefix movineva-backend",
+    "build-frontend": "npm run build --prefix movineva-frontend",
+    "generate-prisma": "npx --prefix movineva-backend prisma generate",
+    "build": "npm run install-frontend && npm run build-frontend && npm run install-backend && npm run generate-prisma",
+    "start": "npm start --prefix movineva-backend"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
