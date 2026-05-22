@@ -2,80 +2,65 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Inicialización de Prisma con manejo de errores de URL
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL ? process.env.DATABASE_URL.replace('postgresql://', 'postgres://') : undefined
-    },
-  },
-});
+const prisma = new PrismaClient();
 
 exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
-    if (!email || !password || !name) {
-      return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
-    }
+    if (!email || !password || !name) return res.status(400).json({ success: false, message: 'Faltan datos' });
 
     const cleanEmail = email.toLowerCase().trim();
-
-    // 1. Verificar conexión
-    try {
-      await prisma.$connect();
-    } catch (err) {
-      console.error('❌ Error de conexión DB:', err.message);
-      return res.status(500).json({
-        success: false,
-        message: 'El servidor no puede conectar con la base de datos',
-        error: err.message
-      });
-    }
-
-    // 2. Verificar si existe
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
+
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
     }
 
-    // 3. Crear usuario
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        email: cleanEmail,
-        password: hashedPassword,
-        name: name.trim()
-      }
+    await prisma.user.create({
+      data: { email: cleanEmail, password: hashedPassword, name: name.trim() }
     });
 
     res.status(201).json({ success: true, message: '¡Registro exitoso! Ya puedes iniciar sesión' });
-
   } catch (error) {
-    console.error('🔴 Error en Registro:', error);
-    res.status(500).json({ success: false, message: 'Error interno al registrar', detail: error.message });
+    res.status(500).json({ success: false, message: 'Error en registro', detail: error.message });
   }
 };
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+    if (!email || !password) return res.status(400).json({ success: false, message: 'Faltan credenciales' });
 
-    if (!user) return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'El correo no está registrado' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
+    }
+
+    // Usar la clave de Render o una por defecto para evitar el error 500
+    const secret = process.env.JWT_SECRET || 'clave_maestra_movineiva_2024';
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || 'dev_secret_123',
-      { expiresIn: '7d' }
+      secret,
+      { expiresIn: '30d' }
     );
 
-    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email } });
+    res.json({
+      success: true,
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error en login', detail: error.message });
+    console.error('🔴 Error en Login:', error);
+    res.status(500).json({ success: false, message: 'Error interno en el inicio de sesión', detail: error.message });
   }
 };
 
