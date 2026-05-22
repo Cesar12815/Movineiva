@@ -1,10 +1,10 @@
 {
   "name": "movineiva-global-monolith",
-  "version": "1.0.5",
+  "version": "1.9.0",
   "description": "Root package for MoviNeiva Global Deployment",
   "scripts": {
-    "build": "cd movineva-frontend && npm install && npm run build && cd ../movineva-backend && npm install && npx prisma generate",
-    "start": "cd movineva-backend && npx prisma migrate deploy && npm start"
+    "build": "npm install --prefix movineva-frontend --include=dev && npm run build --prefix movineva-frontend && npm install --prefix movineva-backend && npx prisma generate --schema=movineva-backend/prisma/schema.prisma",
+    "start": "npx prisma migrate deploy --schema=movineva-backend/prisma/schema.prisma && npm start --prefix movineva-backend"
   },
   "engines": {
     "node": "18.x"
