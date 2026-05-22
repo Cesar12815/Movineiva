@@ -54,25 +54,22 @@ app.get('/health', (req, res) => {
 });
 
 // ─── RUTAS DE LA API ─────────────────────────────────────────────────────────
-// Prefijo versión /api/v1
 const API = '/api/v1';
 
-app.use(`${API}/routes`, routeRoutes);           // RF-01, RF-02, RF-04, RF-07
-app.use(`${API}/stops`, stopRoutes);             // RF-03, RF-04
-app.use(`${API}/favorites`, favoriteRoutes);     // RF-05, RB-03
-app.use(`${API}/reports`, reportRoutes);         // RF-09, RB-05
-app.use(`${API}/fares`, fareRoutes);             // RF-08
-app.use(`${API}/notifications`, notificationRoutes); // RF-10
-app.use(`${API}/dataset`, datasetRoutes);        // RF-06, RB-02 (offline)
-app.use(`${API}/admin`, adminRoutes);            // AC-02 (panel admin)
-app.use(`${API}/delivery`, deliveryRoutes);       // Nuevas funciones de domicilios
-app.use(`${API}/auth`, authRoutes);               // Autenticación de usuarios
+app.use(`${API}/routes`, routeRoutes);
+app.use(`${API}/stops`, stopRoutes);
+app.use(`${API}/favorites`, favoriteRoutes);
+app.use(`${API}/reports`, reportRoutes);
+app.use(`${API}/fares`, fareRoutes);
+app.use(`${API}/notifications`, notificationRoutes);
+app.use(`${API}/dataset`, datasetRoutes);
+app.use(`${API}/admin`, adminRoutes);
+app.use(`${API}/delivery`, deliveryRoutes);
+app.use(`${API}/auth`, authRoutes);
 
-// ─── MANEJO DE ERRORES ────────────────────────────────────────────────────────
-app.use(notFound);
-app.use(errorHandler);
-
-const path = require('path');// Servir los archivos estáticos del Frontend
+// ─── SERVIR FRONTEND (ESTÁTICOS) ─────────────────────────────────────────────
+const path = require('path');
+// Servimos la carpeta dist que generará el build del frontend
 app.use(express.static(path.join(__dirname, '../../movineva-frontend/dist')));
 
 // Cualquier ruta que no sea de la API, entrega el index.html del Frontend
@@ -81,5 +78,9 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../movineva-frontend/dist/index.html'));
   }
 });
+
+// ─── MANEJO DE ERRORES (AL FINAL) ─────────────────────────────────────────────
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
