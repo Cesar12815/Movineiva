@@ -1,12 +1,7 @@
-// 🌐 CONFIGURACIÓN DE CONEXIÓN UNIVERSAL
+// 🌐 CONFIGURACIÓN DE CONEXIÓN GLOBAL (MONOLITO)
 // -------------------------------------------------------------------------
-// 1. Para EMULADOR: Deja '10.0.2.2'
-// 2. Para CELULAR REAL / APK: Pon la IP de tu PC (ej: '192.168.1.15')
-//    (Obtén tu IP escribiendo 'ipconfig' en la terminal de Windows)
-const SERVER_IP = '10.0.2.2';
-const MI_IP_PC = '192.168.40.8';
 
-// URL DE TU NUEVO SERVIDOR GLOBAL EN RENDER
+// URL DE TU SERVIDOR GLOBAL EN RENDER
 const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
 
 const getApiBase = () => {
@@ -15,19 +10,18 @@ const getApiBase = () => {
   const isAndroid = /Android/i.test(userAgent);
 
   // 1. Si estamos en PRODUCCIÓN (Navegador en Render)
-  // Usamos ruta relativa para evitar problemas de CORS y HTTPS
+  // Usamos ruta relativa para evitar problemas de CORS
   if (hostname.includes('onrender.com')) {
     return '/api/v1';
   }
 
   // 2. Si estamos en Android (APK o Emulador)
-  // Siempre apuntamos a Render Global para que funcione en cualquier lugar
+  // Siempre apuntamos a Render Global para que funcione sin PC
   if (isAndroid) {
     return `${GLOBAL_RENDER_URL}/api/v1`;
   }
 
   // 3. Si estamos en Localhost (Desarrollo Web)
-  // Puedes cambiar esto a GLOBAL_RENDER_URL si quieres probar la DB de la nube desde PC
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:3000/api/v1';
   }
@@ -35,23 +29,12 @@ const getApiBase = () => {
   return `${GLOBAL_RENDER_URL}/api/v1`;
 };
 
-  // 2. Si estamos en Android (Emulador o APK local)
-  if (isAndroid) {
-    return `http://${MI_IP_PC}:3001/api/v1`;
-  }
-
-  // 3. Si estamos en el navegador del PC (Desarrollo Web)
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3001/api/v1';
-  }
-
-  return `http://${hostname}:3001/api/v1`;
-};
-
 export const API_BASE = getApiBase();
-export const BASE_URL = API_BASE.replace('/api/v1', '');
+export const BASE_URL = API_BASE.includes('onrender.com') || API_BASE === '/api/v1'
+  ? GLOBAL_RENDER_URL
+  : 'http://localhost:3000';
 
-console.log('🚀 [SYSTEM] Conectado a API:', API_BASE);
+console.log('🚀 [SYSTEM] Modo Global Activo. API:', API_BASE);
 
 export const DEVICE_ID = (() => {
   let id = localStorage.getItem('movineva_device_id');
