@@ -6,18 +6,34 @@
 const SERVER_IP = '10.0.2.2';
 const MI_IP_PC = '192.168.40.8';
 
-// URL DE TU BACKEND EN RENDER (Cópiala de tu Dashboard de Render)
-const RENDER_BACKEND_URL = 'https://movineiva.onrender.com'; // <--- SUSTITUYE POR TU URL REAL
+// URL DE TU NUEVO SERVIDOR GLOBAL EN RENDER
+const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
   const userAgent = navigator.userAgent || '';
   const isAndroid = /Android/i.test(userAgent);
 
-  // 1. Si estamos en PRODUCCIÓN (Render) o queremos probar el backend de la nube desde localhost
-  if (hostname.includes('onrender.com') || hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${RENDER_BACKEND_URL}/api/v1`;
+  // 1. Si estamos en PRODUCCIÓN (Navegador en Render)
+  // Usamos ruta relativa para evitar problemas de CORS y HTTPS
+  if (hostname.includes('onrender.com')) {
+    return '/api/v1';
   }
+
+  // 2. Si estamos en Android (APK o Emulador)
+  // Siempre apuntamos a Render Global para que funcione en cualquier lugar
+  if (isAndroid) {
+    return `${GLOBAL_RENDER_URL}/api/v1`;
+  }
+
+  // 3. Si estamos en Localhost (Desarrollo Web)
+  // Puedes cambiar esto a GLOBAL_RENDER_URL si quieres probar la DB de la nube desde PC
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3000/api/v1';
+  }
+
+  return `${GLOBAL_RENDER_URL}/api/v1`;
+};
 
   // 2. Si estamos en Android (Emulador o APK local)
   if (isAndroid) {
