@@ -1,4 +1,4 @@
-// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v1.0.1
+// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v1.0.2 (Deploy Fix)
 // -------------------------------------------------------------------------
 
 const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
