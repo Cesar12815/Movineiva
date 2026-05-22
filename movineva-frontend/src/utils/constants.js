@@ -1,31 +1,26 @@
-// 🌐 CONFIGURACIÓN DE CONEXIÓN GLOBAL (MONOLITO)
+// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v1.0.1
 // -------------------------------------------------------------------------
 
-// URL DE TU SERVIDOR GLOBAL EN RENDER
 const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
-  // 1. Si estamos en PRODUCCIÓN (Navegador en Render)
-  // Usamos ruta relativa para que el mismo servidor responda
+  // 1. En PRODUCCIÓN (Render)
   if (hostname.includes('onrender.com')) {
     return '/api/v1';
   }
 
-  // 2. PARA TODO LO DEMÁS (Localhost, Android, APK)
-  // Apuntamos directamente a Render para que no dependa de tu PC local
+  // 2. En ANDROID / APK / LOCALHOST
+  // Apuntamos siempre a la nube para que no dependa de tu PC
   return `${GLOBAL_RENDER_URL}/api/v1`;
 };
 
 export const API_BASE = getApiBase();
+export const BASE_URL = GLOBAL_RENDER_URL;
 
-// La BASE_URL debe ser siempre la de Render si estamos en producción o modo global
-export const BASE_URL = window.location.hostname.includes('onrender.com')
-  ? GLOBAL_RENDER_URL
-  : GLOBAL_RENDER_URL;
-
-console.log('🚀 [SYSTEM] Modo Global Activo. Conectado a:', GLOBAL_RENDER_URL);
+console.log('🚀 [SYSTEM] Conectado a:', API_BASE);
 
 export const DEVICE_ID = (() => {
   let id = localStorage.getItem('movineva_device_id');

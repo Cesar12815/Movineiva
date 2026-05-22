@@ -1,7 +1,7 @@
 {
   "name": "movineva-backend",
-  "version": "1.0.0",
-  "description": "Backend API para MoviNeiva - App de Transporte Urbano de Neiva, Huila",
+  "version": "1.0.1",
+  "description": "Backend API Global para MoviNeiva",
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",

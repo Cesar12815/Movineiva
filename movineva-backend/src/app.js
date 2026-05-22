@@ -48,9 +48,16 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
-// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'MoviNeiva Backend', timestamp: new Date().toISOString() });
+// ─── HEALTH CHECK (Diagnóstico) ────────────────────────────────────────────────
+app.get('/health', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected', version: '1.0.1' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', database: 'disconnected', message: err.message });
+  }
 });
 
 // ─── RUTAS DE LA API ─────────────────────────────────────────────────────────
