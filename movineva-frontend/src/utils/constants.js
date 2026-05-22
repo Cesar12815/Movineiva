@@ -7,7 +7,7 @@ const SERVER_IP = '10.0.2.2';
 const MI_IP_PC = '192.168.40.8';
 
 // URL DE TU BACKEND EN RENDER (Cópiala de tu Dashboard de Render)
-const RENDER_BACKEND_URL = 'https://movineva-backend.onrender.com'; // <--- SUSTITUYE POR TU URL REAL
+const RENDER_BACKEND_URL = 'https://movineiva-backend.onrender.com'; // <--- SUSTITUYE POR TU URL REAL
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
