@@ -72,4 +72,14 @@ app.use(`${API}/auth`, authRoutes);               // Autenticación de usuarios
 app.use(notFound);
 app.use(errorHandler);
 
+const path = require('path');// Servir los archivos estáticos del Frontend
+app.use(express.static(path.join(__dirname, '../../movineva-frontend/dist')));
+
+// Cualquier ruta que no sea de la API, entrega el index.html del Frontend
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, '../../movineva-frontend/dist/index.html'));
+  }
+});
+
 module.exports = app;
