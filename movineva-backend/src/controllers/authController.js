@@ -1,29 +1,46 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 const prisma = new PrismaClient();
 
 exports.register = async (req, res) => {
+  // 1. Validar errores de express-validator
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array(), message: 'Datos de registro inválidos' });
+  }
+
   try {
     const { email, password, name } = req.body;
 
-    // Verificar si el usuario ya existe
+    // 2. Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
     }
 
-    // Encriptar contraseña
+    // 3. Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 4. Crear usuario
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword, name }
+      data: {
+        email: email.toLowerCase().trim(),
+        password: hashedPassword,
+        name: name.trim()
+      }
     });
 
     res.status(201).json({ success: true, message: 'Usuario registrado exitosamente' });
   } catch (error) {
-    console.error('Error en registro:', error);
-    res.status(500).json({ success: false, message: 'Error al registrar usuario' });
+    console.error('❌ [AUTH_ERROR]:', error);
+    // Enviar el mensaje de error real para poder diagnosticar en Render
+    res.status(500).json({
+      success: false,
+      message: 'Error al registrar usuario',
+      debug: error.message
+    });
   }
 };
 
