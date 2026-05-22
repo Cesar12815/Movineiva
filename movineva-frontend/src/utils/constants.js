@@ -6,35 +6,26 @@ const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
-  const userAgent = navigator.userAgent || '';
-  const isAndroid = /Android/i.test(userAgent);
 
   // 1. Si estamos en PRODUCCIÓN (Navegador en Render)
-  // Usamos ruta relativa para evitar problemas de CORS
+  // Usamos ruta relativa para que el mismo servidor responda
   if (hostname.includes('onrender.com')) {
     return '/api/v1';
   }
 
-  // 2. Si estamos en Android (APK o Emulador)
-  // Siempre apuntamos a Render Global para que funcione sin PC
-  if (isAndroid) {
-    return `${GLOBAL_RENDER_URL}/api/v1`;
-  }
-
-  // 3. Si estamos en Localhost (Desarrollo Web)
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3000/api/v1';
-  }
-
+  // 2. PARA TODO LO DEMÁS (Localhost, Android, APK)
+  // Apuntamos directamente a Render para que no dependa de tu PC local
   return `${GLOBAL_RENDER_URL}/api/v1`;
 };
 
 export const API_BASE = getApiBase();
-export const BASE_URL = API_BASE.includes('onrender.com') || API_BASE === '/api/v1'
-  ? GLOBAL_RENDER_URL
-  : 'http://localhost:3000';
 
-console.log('🚀 [SYSTEM] Modo Global Activo. API:', API_BASE);
+// La BASE_URL debe ser siempre la de Render si estamos en producción o modo global
+export const BASE_URL = window.location.hostname.includes('onrender.com')
+  ? GLOBAL_RENDER_URL
+  : GLOBAL_RENDER_URL;
+
+console.log('🚀 [SYSTEM] Modo Global Activo. Conectado a:', GLOBAL_RENDER_URL);
 
 export const DEVICE_ID = (() => {
   let id = localStorage.getItem('movineva_device_id');
