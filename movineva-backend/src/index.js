@@ -3,6 +3,13 @@ require('dotenv').config();
 const http = require('http');
 const { Server } = require('socket.io');
 
+// Validar DATABASE_URL de raíz
+if (!process.env.DATABASE_URL) {
+  console.error('❌ FATAL: DATABASE_URL no está definida en las variables de entorno');
+} else {
+  console.log('✅ DATABASE_URL detectada (formato correcto)');
+}
+
 const app = require('./app');
 const { startNotificationScheduler } = require('./services/notificationScheduler');
 const logger = require('./utils/logger');
