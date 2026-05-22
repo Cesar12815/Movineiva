@@ -1,37 +1,58 @@
-// 🚀 CONTROLADOR DE AUTENTICACIÓN GLOBAL BLINDADO
+// 🚀 SISTEMA DE AUTENTICACIÓN GLOBAL v1.2.0
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'MiClaveMaestra2024';
 
+// Función para generar tokens
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, role: user.role || 'USER' },
+    JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+};
+
+// --- REGISTRO ---
 exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    if (!email || !password || !name) return res.status(400).json({ success: false, message: 'Faltan datos' });
+    if (!email || !password || !name) {
+      return res.status(400).json({ success: false, message: 'Faltan datos obligatorios' });
+    }
 
     const cleanEmail = email.toLowerCase().trim();
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
+      return res.status(400).json({ success: false, message: 'Este correo ya tiene cuenta. ¡Inicia sesión!' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: { email: cleanEmail, password: hashedPassword, name: name.trim() }
     });
 
-    res.status(201).json({ success: true, message: '¡Registro exitoso! Ya puedes iniciar sesión' });
+    const token = generateToken(user);
+    res.status(201).json({
+      success: true,
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error en registro', detail: error.message });
+    res.status(500).json({ success: false, message: 'Error en el servidor al registrar' });
   }
 };
 
+// --- LOGIN ---
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ success: false, message: 'Faltan credenciales' });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Ingresa correo y clave' });
+    }
 
     const cleanEmail = email.toLowerCase().trim();
     const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
@@ -45,23 +66,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
     }
 
-    // Usar la clave de Render o una por defecto para evitar el error 500
-    const secret = process.env.JWT_SECRET || 'clave_maestra_movineiva_2024';
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      secret,
-      { expiresIn: '30d' }
-    );
-
+    const token = generateToken(user);
     res.json({
       success: true,
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
-    console.error('🔴 Error en Login:', error);
-    res.status(500).json({ success: false, message: 'Error interno en el inicio de sesión', detail: error.message });
+    res.status(500).json({ success: false, message: 'Error interno en el servidor' });
   }
 };
 
@@ -73,6 +85,6 @@ exports.getMe = async (req, res) => {
     });
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al obtener perfil' });
+    res.status(500).json({ success: false, message: 'Error al obtener sesión' });
   }
 };
