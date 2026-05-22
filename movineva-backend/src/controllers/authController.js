@@ -1,45 +1,57 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
 const prisma = new PrismaClient();
 
 exports.register = async (req, res) => {
-  // 1. Validar errores de express-validator
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ success: false, errors: errors.array(), message: 'Datos de registro inválidos' });
-  }
-
   try {
     const { email, password, name } = req.body;
 
-    // 2. Verificar si el usuario ya existe
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (!email || !password || !name) {
+      return res.status(400).json({ success: false, message: 'Faltan campos obligatorios' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    // 1. Verificación de conexión
+    try {
+      await prisma.$connect();
+    } catch (dbError) {
+      return res.status(500).json({ success: false, message: 'No hay conexión con la base de datos', error: dbError.message });
+    }
+
+    // 2. ¿Ya existe?
+    const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
     }
 
-    // 3. Encriptar contraseña
+    // 3. Encriptar
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Crear usuario
-    const user = await prisma.user.create({
+    // 4. CREAR (Aquí es donde falla)
+    const newUser = await prisma.user.create({
       data: {
-        email: email.toLowerCase().trim(),
+        email: cleanEmail,
         password: hashedPassword,
-        name: name.trim()
+        name: name.trim(),
+        role: 'USER'
       }
     });
 
-    res.status(201).json({ success: true, message: 'Usuario registrado exitosamente' });
+    res.status(201).json({
+      success: true,
+      message: 'Usuario creado!',
+      user: { id: newUser.id, email: newUser.email }
+    });
+
   } catch (error) {
-    console.error('❌ [AUTH_ERROR]:', error);
-    // Enviar el mensaje de error real para poder diagnosticar en Render
+    console.error('🔴 [FATAL_ERROR]:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al registrar usuario',
-      debug: error.message
+      message: 'Error de raíz en el servidor',
+      detail: error.message,
+      code: error.code // Esto nos dará el código de Prisma (ej: P2002)
     });
   }
 };
@@ -47,32 +59,22 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
-    }
+    if (!user) return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
-    }
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
 
-    // Generar Token JWT
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || 'secret_key_movineva',
+      process.env.JWT_SECRET || 'dev_secret',
       { expiresIn: '7d' }
     );
 
-    res.json({
-      success: true,
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
-    });
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (error) {
-    console.error('Error en login:', error);
-    res.status(500).json({ success: false, message: 'Error al iniciar sesión' });
+    res.status(500).json({ success: false, message: 'Error en login', detail: error.message });
   }
 };
 
