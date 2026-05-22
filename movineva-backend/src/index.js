@@ -1,4 +1,5 @@
 // src/index.js
+// 🚀 MOVI NEIVA - SISTEMA GLOBAL V1.0.0
 require('dotenv').config();
 const http = require('http');
 const { Server } = require('socket.io');
