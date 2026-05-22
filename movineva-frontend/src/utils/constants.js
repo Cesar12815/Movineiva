@@ -7,15 +7,15 @@ const SERVER_IP = '10.0.2.2';
 const MI_IP_PC = '192.168.40.8';
 
 // URL DE TU BACKEND EN RENDER (Cópiala de tu Dashboard de Render)
-const RENDER_BACKEND_URL = 'https://movineiva-backend.onrender.com'; // <--- SUSTITUYE POR TU URL REAL
+const RENDER_BACKEND_URL = 'https://movineiva.onrender.com'; // <--- SUSTITUYE POR TU URL REAL
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
   const userAgent = navigator.userAgent || '';
   const isAndroid = /Android/i.test(userAgent);
 
-  // 1. Si estamos en PRODUCCIÓN (Render)
-  if (hostname.includes('onrender.com')) {
+  // 1. Si estamos en PRODUCCIÓN (Render) o queremos probar el backend de la nube desde localhost
+  if (hostname.includes('onrender.com') || hostname === 'localhost' || hostname === '127.0.0.1') {
     return `${RENDER_BACKEND_URL}/api/v1`;
   }
 
