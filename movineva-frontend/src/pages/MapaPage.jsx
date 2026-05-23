@@ -12,23 +12,32 @@ import io from 'socket.io-client'
 
 // Icono para sitios ya mapeados por la comunidad
 const communitySiteIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/9561/9561688.png',
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
-  // Pin Estilo Delivery Pro (Azul Vibrante)
+// Pin Estilo Delivery Pro (Azul)
 const deliveryIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-  iconSize: [45, 45],
-  iconAnchor: [22, 45],
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
-// Icono del Repartidor (Moto)
+// Icono del Repartidor (Moto/Punto Rojo)
 const motorIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/198/198416.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 // Estilos para marcadores de alerta (DivIcon) mejorados
@@ -602,9 +611,9 @@ export default function MapaPage() {
 
           <MapContainer center={centerNeiva} zoom={15} zoomControl={false} style={{ height: '100%', width: '100%' }}>
             <CameraControl center={isNavigating ? currentLocation : userCoords} isNavigating={isNavigating} />
-            <TileLayer url={isDarkMode
-              ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png"}
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
             />
             <MapEvents onClick={handleMapClick} onMoveEnd={loadNearbyData} />
 
