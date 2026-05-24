@@ -4,10 +4,12 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Device } from '@capacitor/device';
 import { deliveryApi, reportsApi } from '../api';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { DEVICE_ID, BASE_URL } from '../utils/constants';
 import io from 'socket.io-client';
 
 const DomiciliosPage = () => {
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [tracking, setTracking] = useState(false);
@@ -31,13 +33,29 @@ const DomiciliosPage = () => {
 
   const [communityNews, setCommunityNews] = useState([]);
 
+  // --- MOTOR DE VOZ AMIGABLE v2.7.0 ---
   const speak = (text) => {
-    if ('speechSynthesis' in window) {
+    if (!text || !('speechSynthesis' in window)) return;
+
+    try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
+
+      const voices = window.speechSynthesis.getVoices();
+      // Buscamos una voz más cálida (Google o Natural en Español)
+      const friendlyVoice = voices.find(v =>
+        (v.name.includes('Google') || v.name.includes('Natural') || v.lang.includes('es-MX')) &&
+        v.lang.includes('es')
+      );
+
+      if (friendlyVoice) u.voice = friendlyVoice;
+
       u.lang = 'es-CO';
-      u.rate = 1.1;
+      u.rate = 0.95;  // Un poquito más lento para sonar humano
+      u.pitch = 1.1;   // Un poquito más agudo para sonar amable
       window.speechSynthesis.speak(u);
+    } catch (e) {
+      console.error("Error en voz amigable:", e);
     }
   };
 
@@ -57,7 +75,7 @@ const DomiciliosPage = () => {
           id: r.id,
           type: r.type,
           msg: r.description,
-          user: r.deviceId?.substring(0, 5) || 'Anon'
+          user: r.userName || 'Compañero'
         })));
       }
 
@@ -95,23 +113,27 @@ const DomiciliosPage = () => {
           id: report.id,
           type: report.type,
           msg: report.description,
-          user: report.deviceId?.substring(0, 5) || 'Anon'
+          user: report.userName || 'Compañero'
         },
         ...prev
       ].slice(0, 8));
 
       if (report.type === 'POLICE' || report.type === 'DANGER') {
-        speak(`Alerta en la red: ${report.description}`);
+        speak(`Atención equipo: ${report.userName || 'Un compañero'} reportó una novedad: ${report.description}`);
       }
     });
 
     fetchData();
 
-    // Solo dar bienvenida si tenemos datos cargados
+    // Bienvenida amigable y única
+    const hour = new Date().getHours();
+    const saludo = hour < 12 ? "¡Buen día" : hour < 18 ? "¡Buenas tardes" : "¡Buena noche";
+    const name = authUser?.name?.split(' ')[0] || "Pro";
+
     if (stats.deliveries > 0) {
-      speak(`Bienvenido de nuevo. Llevas ${stats.deliveries} entregas y has ganado ${stats.earnings} pesos.`);
+      speak(`${saludo} ${name}. Qué alegría verte. Llevas un excelente ritmo con ${stats.deliveries} entregas. ¡Sigue así!`);
     } else {
-      speak("Bienvenido al centro de mando. Tienes 0 entregas hoy. ¡A darle, Pro!");
+      speak(`${saludo} ${name}. Bienvenido a tu centro de mando. Hoy vamos a romperla. ¿Listo para la primera entrega?`);
     }
 
     const interval = setInterval(() => {

@@ -89,9 +89,11 @@ function CameraControl({ center, isNavigating }) {
 
 import { useFavorites } from '../hooks/useFavorites'
 import { DEVICE_ID } from '../utils/constants'
+import { useAuth } from '../context/AuthContext'
 
 // ... (dentro de MapaPage)
 export default function MapaPage() {
+  const { user } = useAuth()
   const { toast } = useToast()
   const { add: addToFavs, favIds } = useFavorites()
   const navigate = useNavigate()
@@ -120,20 +122,30 @@ export default function MapaPage() {
   const centerNeiva = [2.9333, -75.2872]
   const API_BASE_URL = BASE_URL; // Dinámico para emulador o web
 
-  // --- MOTOR DE VOZ INTELIGENTE (SAFETIED) ---
+  // --- MOTOR DE VOZ AMIGABLE (Edición v2.8.0) ---
   const speak = (text) => {
-    if (!text) return;
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-ES';
-        utterance.rate = 1.05;
-        // Algunos navegadores requieren que speak ocurra después de un evento
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.error("TTS Error:", e);
-      }
+    if (!text || !('speechSynthesis' in window)) return;
+
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      // Esperar a que las voces carguen y buscar una voz cálida
+      const voices = window.speechSynthesis.getVoices();
+      const friendlyVoice = voices.find(v =>
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('México')) &&
+        v.lang.includes('es')
+      );
+
+      if (friendlyVoice) utterance.voice = friendlyVoice;
+
+      utterance.lang = 'es-CO';
+      utterance.rate = 0.92; // Más pausado y humano
+      utterance.pitch = 1.1; // Tono más amable y menos plano
+
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error("TTS Human Error:", e);
     }
   };
 
@@ -178,20 +190,21 @@ export default function MapaPage() {
       console.log('📢 Nueva alerta recibida:', report);
 
       setNearbyReports(prev => {
-        // Evitar duplicados (especialmente con el optimistic update)
-        if (prev.some(r => r.id === report.id || (Math.abs(r.latitude - report.latitude) < 0.0001 && r.type === report.type))) {
-          return prev;
-        }
+        // Evitar duplicados
+        if (prev.some(r => r.id === report.id)) return prev;
+
         return [{
           ...report,
           latitude: Number(report.latitude),
           longitude: Number(report.longitude),
-          type: String(report.type)
+          type: String(report.type),
+          userName: report.userName || 'Un compañero'
         }, ...prev];
       });
 
-      // Notificación sonora/voz
-      speak(`Atención domiciliario: Alerta de ${report.type} detectada.`);
+      // Notificación sonora/voz más humana
+      const sender = report.userName || 'Un compañero';
+      speak(`Atención: ${sender} reportó un ${report.type} cerca de tu posición.`);
     });
 
     return () => {
@@ -332,7 +345,7 @@ export default function MapaPage() {
     setIsNavigating(true);
     setSheetHeight(25);
     radarTriggered.current = false;
-    speak(`Ruta iniciada hacia ${placeName}. Sigue el indicador. El radar de fotos se activará al llegar.`);
+    speak(`¡Todo listo! Iniciamos el viaje hacia ${placeName}. Te avisaré cuando estemos cerca de la fachada.`);
 
     // Iniciar seguimiento de GPS para el Radar
     watchId.current = Geolocation.watchPosition({
@@ -369,7 +382,7 @@ export default function MapaPage() {
 
     if (targetSite?.photoUrl) {
       setRadarVisible(true);
-      speak(`Atención: Fachada de ${targetSite.customerName} detectada. Revisa el radar.`);
+      speak(`¡Mira! Estamos llegando. Aquí tienes la foto de la fachada de ${targetSite.customerName} para que no te pierdas.`);
     }
   };
 
@@ -395,7 +408,7 @@ export default function MapaPage() {
     }
 
     setSheetHeight(85);
-    speak("¡Has llegado! Entrega registrada en tu historial. Toma la foto de la fachada ahora para que la próxima vez sea más fácil.");
+    speak("¡Excelente llegada! Ya registré tu entrega. Si puedes, regálanos una fotico de la fachada para ayudar a los demás compañeros.");
   };
 
   const takeSitePhoto = async () => {
@@ -413,7 +426,7 @@ export default function MapaPage() {
       });
       setPhoto(image.base64String);
       setSheetHeight(90); // Expandir al máximo para editar notas
-      speak("Foto guardada. Deja una nota rápida sobre el timbre o la entrada.");
+      speak("¡Qué buena foto! Ahora déjanos un detallito sobre la entrada para completar el mapeo.");
     } catch (e) {
       console.log("Cámara cancelada o error:", e);
     }
@@ -445,7 +458,7 @@ export default function MapaPage() {
 
       if (res.success) {
         toast("✅ Sitio mapeado con éxito. ¡Buen trabajo!", "success");
-        speak("Excelente. Fachada guardada. Ya aparecerá en el radar de todos los compañeros.");
+        speak("¡Perfecto! Fachada guardada con éxito. Mil gracias por ayudar a que la comunidad crezca.");
         setUserCoords(null);
         setPhoto(null);
         setDescription('');
@@ -473,12 +486,13 @@ export default function MapaPage() {
 
     try {
       setLoading(true);
-      // Asegurar coordenadas limpias para el móvil
+      // Asegurar coordenadas limpias para el móvil e incluir nombre de usuario
       const payload = {
         latitude: parseFloat(coords.lat),
         longitude: parseFloat(coords.lng),
         type,
-        description: `Alerta de ${label} reportada en vivo por domiciliario`
+        description: `Alerta de ${label} reportada en vivo por domiciliario`,
+        userName: user?.name || 'Un compañero'
       };
 
       console.log("📡 [ALERT_SYNC] Enviando:", payload);
@@ -486,7 +500,7 @@ export default function MapaPage() {
 
       if (res.success || res.id || res.data) {
         toast(`✅ ¡${label} Reportado!`, "success");
-        speak(`Atención: Alerta de ${label} compartida con éxito.`);
+        speak(`¡Buen trabajo ${user?.name || ''}! Tu alerta ya está en el radar de todos.`);
         setReportModal(null);
 
         // Actualización inmediata del radar local (Optimistic UI)
@@ -658,8 +672,9 @@ export default function MapaPage() {
                   zIndexOffset={2000}
                   eventHandlers={{
                     click: () => {
-                      speak(`Alerta de ${report.type}: ${report.description || 'Sin detalles'}`);
-                      toast(`${report.type}: ${report.description}`, "warning");
+                      const msg = `${report.userName || 'Compañero'} reportó: ${report.type}`;
+                      speak(msg);
+                      toast(msg, "warning");
                     }
                   }}
                 />

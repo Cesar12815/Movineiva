@@ -3,12 +3,13 @@ import { apiClient } from './client'
 
 export const reportsApi = {
   /** Crear reporte de zona caliente (Tráfico, Retén, Peligro) */
-  create: ({ latitude, longitude, type, description }) =>
+  create: ({ latitude, longitude, type, description, userName }) =>
     apiClient.post('/reports', {
       latitude,
       longitude,
       type,
       description,
+      userName,
     }),
 
   /** Obtener reportes activos en un área */

@@ -14,18 +14,20 @@ const createReport = async (req, res, next) => {
     console.log('📦 [REPORT_DEBUG] Body recibido:', req.body);
     console.log('🔑 [REPORT_DEBUG] Headers:', { deviceId, sessionId });
 
-    const { latitude, longitude, type, description } = req.body;
+    const { latitude, longitude, type, description, userName } = req.body;
 
     // Validación ultra-segura de números
     const lat = Number(latitude) || 2.9333;
     const lng = Number(longitude) || -75.2872;
     const finalType = String(type || 'OTHER').toUpperCase();
+    const finalUserName = String(userName || 'Compañero');
 
     let report;
     try {
       report = await prisma.report.create({
         data: {
           deviceId,
+          userName: finalUserName,
           sessionId,
           latitude: lat,
           longitude: lng,
