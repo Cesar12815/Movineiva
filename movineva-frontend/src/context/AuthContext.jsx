@@ -10,9 +10,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      // Aquí podrías validar el token con el backend
       const savedUser = localStorage.getItem('user');
-      if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        // Aplicar color de tema guardado
+        if (parsedUser.config?.themeColor) {
+          document.documentElement.style.setProperty('--brand', parsedUser.config.themeColor);
+        }
+      }
     }
     setLoading(false);
   }, [token]);
@@ -22,6 +28,10 @@ export const AuthProvider = ({ children }) => {
     setToken(tokenData);
     localStorage.setItem('token', tokenData);
     localStorage.setItem('user', JSON.stringify(userData));
+    // Aplicar color al iniciar sesión
+    if (userData.config?.themeColor) {
+      document.documentElement.style.setProperty('--brand', userData.config.themeColor);
+    }
   };
 
   const logout = () => {

@@ -5,10 +5,12 @@ async function request(path, options = {}) {
 
   console.log('📡 [API_CALL]:', url);
 
+  const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json',
     'X-Device-ID':  DEVICE_ID,
     'X-Session-ID': SESSION_ID,
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
