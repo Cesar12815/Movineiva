@@ -24,6 +24,7 @@ model Route {
   favorites     Favorite[]
   notifications Notification[]
   stops         RouteStop[]
+  reports       Report[]
 
   @@index([lineNumber])
   @@index([isActive])
@@ -41,6 +42,7 @@ model Stop {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   routes    RouteStop[]
+  reports   Report[]
 
   @@index([latitude, longitude])
   @@index([zone])

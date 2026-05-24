@@ -43,15 +43,17 @@ export const REPORT_TYPES = [
 export const MAX_FAVORITES = 20;
 
 export const REPORT_STATUS_LABELS = {
-  active: 'Activo',
-  resolved: 'Resuelto',
-  expired: 'Expirado'
+  PENDING: 'Pendiente',
+  IN_REVIEW: 'En Revisión',
+  RESOLVED: 'Resuelto',
+  REJECTED: 'Rechazado'
 };
 
 export const REPORT_STATUS_COLORS = {
-  active: '#22c55e',
-  resolved: '#6b7280',
-  expired: '#ef4444'
+  PENDING: '#f59e0b',
+  IN_REVIEW: '#3b82f6',
+  RESOLVED: '#22c55e',
+  REJECTED: '#ef4444'
 };
 
 export const SERVICE_LABELS = {
