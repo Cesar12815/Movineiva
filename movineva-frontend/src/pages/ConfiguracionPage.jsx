@@ -43,8 +43,8 @@ export default function ConfiguracionPage() {
       })
       if (res.success) {
         toast('¡Configuración guardada con éxito! ✨', 'success')
-        // Actualizar el contexto de auth si es necesario
-        login({ ...user, name: profile.name }, localStorage.getItem('token'))
+        // Actualizamos los datos globales para que persistan al recargar
+        login({ ...user, ...res.data }, localStorage.getItem('token'))
       }
     } catch (err) {
       toast('Error al guardar los cambios', 'error')
@@ -52,6 +52,11 @@ export default function ConfiguracionPage() {
       setLoadingSaving(false)
     }
   }
+
+  const updateTheme = (color) => {
+    setProfile({ ...profile, config: { ...profile.config, themeColor: color } });
+    document.documentElement.style.setProperty('--brand', color);
+  };
 
   if (loading) return <div style={{ padding: 20 }}><Spinner /></div>
 
@@ -146,7 +151,7 @@ export default function ConfiguracionPage() {
             {['#2563eb', '#f97316', '#10b981', '#8b5cf6', '#ef4444'].map(color => (
               <div
                 key={color}
-                onClick={() => setProfile({...profile, config: {...profile.config, themeColor: color}})}
+                onClick={() => updateTheme(color)}
                 style={{
                   width: 40, height: 40, borderRadius: 10,
                   background: color, cursor: 'pointer',

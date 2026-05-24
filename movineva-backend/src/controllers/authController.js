@@ -1,9 +1,8 @@
 // 🚀 SISTEMA DE AUTENTICACIÓN GLOBAL v1.2.0
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../config/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'MiClaveMaestra2024';
 
 // Función para generar tokens
@@ -87,10 +86,22 @@ exports.login = async (req, res) => {
     }
 
     const token = generateToken(user);
+
+    // Asegurar que usuarios antiguos tengan config y PIN sin romper el login
+    const userConfig = user.config || { themeColor: '#2563eb', voiceVolume: 0.8, alertVolume: 1.0 };
+    const userPin = user.secretPin || Math.floor(1000 + Math.random() * 9000).toString();
+
     res.json({
       success: true,
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        config: userConfig,
+        secretPin: userPin
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error interno en el servidor' });
