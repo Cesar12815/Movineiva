@@ -189,10 +189,27 @@ model User {
   password  String
   name      String
   role      UserRole @default(USER)
+  secretPin String?  // PIN de 4 dígitos para configuración
+  avatarUrl String?  // Foto de perfil
+  config    Json?    // Preferencias de volumen y colores
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  messages  InternalMessage[]
 
   @@map("users")
+}
+
+model InternalMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  content   String
+  type      String   @default("SYSTEM") // SYSTEM, ALERT, PROMO
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("internal_messages")
 }
 
 enum UserRole {

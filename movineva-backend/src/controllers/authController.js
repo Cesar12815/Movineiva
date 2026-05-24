@@ -30,18 +30,38 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Este correo ya tiene cuenta. ¡Inicia sesión!' });
     }
 
+    // Generar PIN secreto de 4 dígitos (ej: 4821)
+    const secretPin = Math.floor(1000 + Math.random() * 9000).toString();
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
-      data: { email: cleanEmail, password: hashedPassword, name: name.trim() }
+      data: {
+        email: cleanEmail,
+        password: hashedPassword,
+        name: name.trim(),
+        secretPin: secretPin,
+        config: { voiceVolume: 0.8, alertVolume: 1.0, themeColor: '#2563eb' }
+      }
+    });
+
+    // Crear el primer "SMS" interno de bienvenida con el PIN
+    await prisma.internalMessage.create({
+      data: {
+        userId: user.id,
+        title: '🔒 Tu Clave Secreta',
+        content: `¡Hola ${user.name}! Bienvenido a la comunidad MoviNeiva Pro. Tu clave secreta para acceder a la configuración avanzada es: ${secretPin}. ¡Éxitos en tus rutas!`,
+        type: 'SYSTEM'
+      }
     });
 
     const token = generateToken(user);
     res.status(201).json({
       success: true,
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, secretPin: user.secretPin }
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: 'Error en el servidor al registrar' });
   }
 };

@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext'
 const NAV_ITEMS = [
   { path: '/',               icon: '🗺️',  label: 'Mapa de Agilidad' },
   { path: '/domicilios',     icon: '📦',  label: 'Mis Entregas'    },
+  { path: '/mensajes',       icon: '📩',  label: 'Buzón Pro'       },
   { path: '/favoritos',      icon: '⭐',  label: 'Sitios Top'       },
   { path: '/reportes',       icon: '⚠️',  label: 'Reportar Zona'    },
-  { path: '/admin',          icon: '⚙️',  label: 'Configuración'    },
+  { path: '/configuracion',  icon: '👤',  label: 'Mi Perfil'       },
 ]
 
 export default function Sidebar({ isOpen, close }) {

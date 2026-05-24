@@ -11,6 +11,8 @@ import AdminPage          from './pages/AdminPage'
 import DomiciliosPage     from './pages/DomiciliosPage'
 import LoginPage          from './pages/LoginPage'
 import RegisterPage       from './pages/RegisterPage'
+import MensajesPage       from './pages/MensajesPage'
+import ConfiguracionPage  from './pages/ConfiguracionPage'
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -37,6 +39,8 @@ export default function App() {
                     <Route path="/domicilios"     element={<DomiciliosPage />} />
                     <Route path="/favoritos"      element={<FavoritosPage />} />
                     <Route path="/reportes"       element={<ReportesPage />} />
+                    <Route path="/mensajes"       element={<MensajesPage />} />
+                    <Route path="/configuracion"  element={<ConfiguracionPage />} />
                     <Route path="/admin"          element={<AdminPage />} />
                     <Route path="*"               element={<Navigate to="/" />} />
                   </Routes>

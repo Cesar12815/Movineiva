@@ -21,6 +21,7 @@ const datasetRoutes = require('./routes/datasetRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use(`${API}/dataset`, datasetRoutes);
 app.use(`${API}/admin`, adminRoutes);
 app.use(`${API}/delivery`, deliveryRoutes);
 app.use(`${API}/auth`, authRoutes);
+app.use(`${API}/users`, userRoutes);
 
 // ─── SERVIR FRONTEND (ESTÁTICOS) ─────────────────────────────────────────────
 const path = require('path');
