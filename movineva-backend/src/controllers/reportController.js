@@ -14,12 +14,12 @@ const createReport = async (req, res, next) => {
     console.log('📦 [REPORT_DEBUG] Body recibido:', req.body);
     console.log('🔑 [REPORT_DEBUG] Headers:', { deviceId, sessionId });
 
-    const { latitude, longitude, type, description, userName } = req.body;
+    const { latitude, longitude, type, description, userName, stopId, routeId } = req.body;
 
     // Validación ultra-segura de números
-    const lat = Number(latitude) || 2.9333;
-    const lng = Number(longitude) || -75.2872;
-    const finalType = String(type || 'OTHER').toUpperCase();
+    const lat = latitude ? Number(latitude) : null;
+    const lng = longitude ? Number(longitude) : null;
+    const finalType = String(type || 'TRAFFIC').toUpperCase();
     const finalUserName = String(userName || 'Compañero');
 
     let report;
@@ -31,9 +31,15 @@ const createReport = async (req, res, next) => {
           sessionId,
           latitude: lat,
           longitude: lng,
+          stopId: stopId || null,
+          routeId: routeId || null,
           type: ['TRAFFIC', 'POLICE', 'DANGER', 'ROAD_BLOCK', 'OTHER'].includes(finalType) ? finalType : 'OTHER',
           description: description || `Reporte de ${finalType}`,
           status: 'PENDING'
+        },
+        include: {
+          stop: true,
+          route: true
         }
       });
       console.log('✅ [DATABASE] Reporte guardado con éxito');

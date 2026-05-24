@@ -1,4 +1,4 @@
-// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v2.7.0 (PRODUCCIÓN)
+// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v2.8.0 (HUMANIZED)
 // -------------------------------------------------------------------------
 
 const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';

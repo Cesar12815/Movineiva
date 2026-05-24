@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { reportsApi, stopsApi, routesApi } from '../api'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
 import { REPORT_TYPES, REPORT_STATUS_LABELS, REPORT_STATUS_COLORS } from '../utils/constants'
 import PageHeader  from '../components/ui/PageHeader'
 import Card        from '../components/ui/Card'
@@ -12,9 +13,10 @@ import Select      from '../components/ui/Select'
 import Button      from '../components/ui/Button'
 import Badge       from '../components/ui/Badge'
 
-const DEFAULT_FORM = { stopId: '', routeId: '', type: 'STOP_ERROR', description: '' }
+const DEFAULT_FORM = { stopId: '', routeId: '', type: 'TRAFFIC', description: '' }
 
 export default function ReportesPage() {
+  const { user } = useAuth()
   const { toast } = useToast()
 
   const [stops,      setStops]      = useState([])
@@ -28,6 +30,9 @@ export default function ReportesPage() {
     Promise.all([stopsApi.getAll(), routesApi.getAll()]).then(([sr, rr]) => {
       if (sr.success) setStops(sr.data)
       if (rr.success) setRoutes(rr.data)
+    }).catch(err => {
+      console.error("Error cargando selectores:", err)
+      toast("Error al cargar paraderos o rutas", "error")
     })
   }, [])
 
@@ -35,26 +40,32 @@ export default function ReportesPage() {
     if (form.description.trim().length < 10) {
       toast('La descripción debe tener al menos 10 caracteres', 'error'); return
     }
-    if (!form.stopId && !form.routeId) {
-      toast('Selecciona el paradero o la ruta que estás reportando', 'error'); return
-    }
+
     setSubmitting(true)
-    const r = await reportsApi.create({
-      stopId:      form.stopId  || undefined,
-      routeId:     form.routeId || undefined,
-      type:        form.type,
-      description: form.description.trim(),
-    })
-    if (r.success) {
-      toast('Reporte enviado. ¡Gracias por mejorar MoviNeiva! 🙏', 'success')
-      setSentId(r.data.id)
-      setStatus(null)
-      setForm(DEFAULT_FORM)
-    } else {
-      // RB-05: REPORT_ALREADY_SENT
-      toast(r.message, r.code === 'REPORT_ALREADY_SENT' ? 'warning' : 'error')
+    try {
+      const payload = {
+        stopId:      form.stopId  || undefined,
+        routeId:     form.routeId || undefined,
+        type:        form.type,
+        description: form.description.trim(),
+        userName:    user?.name || 'Compañero'
+      }
+
+      const r = await reportsApi.create(payload)
+
+      if (r.success) {
+        toast('Reporte enviado. ¡Gracias por ayudar, Pro! 🚀', 'success')
+        setSentId(r.data.id)
+        setStatus(null)
+        setForm(DEFAULT_FORM)
+      } else {
+        toast(r.message || 'Error al enviar reporte', 'error')
+      }
+    } catch (e) {
+      toast('Error de conexión con el servidor', 'error')
+    } finally {
+      setSubmitting(false)
     }
-    setSubmitting(false)
   }
 
   const checkStatus = async () => {

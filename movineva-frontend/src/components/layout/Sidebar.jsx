@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 const NAV_ITEMS = [
   { path: '/',               icon: '🗺️',  label: 'Mapa de Agilidad' },
@@ -9,6 +10,15 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar({ isOpen, close }) {
+  const { logout, user } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    close()
+    navigate('/login')
+  }
+
   return (
     <aside style={{
       width: '260px',
@@ -46,7 +56,7 @@ export default function Sidebar({ isOpen, close }) {
               MoviNeiva
             </div>
             <div style={{ color: '#2563eb', fontSize: 11, fontWeight: 700 }}>
-              DELIVERY PRO
+              {user?.name?.split(' ')[0].toUpperCase() || 'DELIVERY'} PRO
             </div>
           </div>
         </div>
@@ -81,9 +91,31 @@ export default function Sidebar({ isOpen, close }) {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div style={{ padding: '20px', borderTop: '1px solid #222', color: '#555', fontSize: 12 }}>
-        📍 Neiva, Huila
+      {/* Logout & Footer */}
+      <div style={{ padding: '15px', borderTop: '1px solid #222' }}>
+        <button
+          onClick={handleLogout}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            color: '#ef4444',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}
+        >
+          <span>🚪</span> Cerrar Sesión
+        </button>
+        <div style={{ textAlign: 'center', color: '#555', fontSize: 10, marginTop: 15 }}>
+          v2.8.0 • Neiva, Huila
+        </div>
       </div>
     </aside>
   )
