@@ -473,21 +473,23 @@ export default function MapaPage() {
 
     try {
       setLoading(true);
+      // Asegurar coordenadas limpias para el móvil
       const payload = {
-        latitude: Number(coords.lat),
-        longitude: Number(coords.lng),
+        latitude: parseFloat(coords.lat),
+        longitude: parseFloat(coords.lng),
         type,
-        description: `Alerta de ${label} reportada por domiciliario`
+        description: `Alerta de ${label} reportada en vivo por domiciliario`
       };
 
+      console.log("📡 [ALERT_SYNC] Enviando:", payload);
       const res = await reportsApi.create(payload);
 
-      if (res.success || res.id) {
-        toast("✅ ¡Alerta compartida!", "success");
-        speak(`Alerta registrada con éxito.`);
-        setReportModal(null); // Solo cerramos si fue exitoso
+      if (res.success || res.id || res.data) {
+        toast(`✅ ¡${label} Reportado!`, "success");
+        speak(`Atención: Alerta de ${label} compartida con éxito.`);
+        setReportModal(null);
 
-        // Agregar localmente de inmediato para feedback visual instantáneo
+        // Actualización inmediata del radar local (Optimistic UI)
         const newAlert = res.data || { ...payload, id: Date.now(), createdAt: new Date() };
         setNearbyReports(prev => [newAlert, ...prev]);
       }
@@ -757,24 +759,26 @@ export default function MapaPage() {
           /* FAB Alert */
           .fab-alert {
             position: absolute;
-            top: 130px;
-            left: 15px;
-            z-index: 1001;
-            width: 55px;
-            height: 55px;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            z-index: 2500;
+            width: 70px;
+            height: 70px;
             background: #ef4444;
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 24px;
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+            font-size: 32px;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 3px solid white;
+            border: 4px solid white;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           }
-          .fab-alert:active { transform: scale(0.9); }
+          .fab-alert:active { transform: translateY(-50%) scale(0.9); background: #b91c1c; }
 
           /* Radar de Fotos */
           .photo-radar-overlay { position: absolute; top: 130px; right: 15px; z-index: 1001; width: 180px; animation: slideIn 0.5s ease; }
@@ -873,7 +877,7 @@ export default function MapaPage() {
           .error-screen { padding: 50px; color: white; background: #000; height: 100vh; display: flex; align-items: center; justify-content: center; font-weight: 900; }
 
           /* Report Modal */
-          .report-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+          .report-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
           .report-card { background: #fff; width: 100%; max-width: 350px; border-radius: 30px; padding: 30px; text-align: center; }
           .report-card h3 { font-weight: 900; margin-bottom: 10px; color: #111; }
           .report-card p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
