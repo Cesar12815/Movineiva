@@ -8,15 +8,23 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  const applyTheme = (color) => {
+    if (!color) return;
+    const root = document.documentElement;
+    root.style.setProperty('--brand', color);
+    root.style.setProperty('--brand-dark', color);
+    root.style.setProperty('--brand-glow', `${color}44`);
+    root.style.setProperty('--brand-subtle', `${color}14`);
+  };
+
   useEffect(() => {
     if (token) {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
-        // Aplicar color de tema guardado
         if (parsedUser.config?.themeColor) {
-          document.documentElement.style.setProperty('--brand', parsedUser.config.themeColor);
+          applyTheme(parsedUser.config.themeColor);
         }
       }
     }
@@ -28,9 +36,8 @@ export const AuthProvider = ({ children }) => {
     setToken(tokenData);
     localStorage.setItem('token', tokenData);
     localStorage.setItem('user', JSON.stringify(userData));
-    // Aplicar color al iniciar sesión
     if (userData.config?.themeColor) {
-      document.documentElement.style.setProperty('--brand', userData.config.themeColor);
+      applyTheme(userData.config.themeColor);
     }
   };
 

@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, close }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 45, height: 45,
-            background: '#2563eb',
+            background: 'var(--brand, #2563eb)',
             borderRadius: 12,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22,
@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, close }) {
             <div style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>
               MoviNeiva
             </div>
-            <div style={{ color: '#2563eb', fontSize: 11, fontWeight: 700 }}>
+            <div style={{ color: 'var(--brand, #2563eb)', fontSize: 11, fontWeight: 700 }}>
               {user?.name?.split(' ')[0].toUpperCase() || 'DELIVERY'} PRO
             </div>
           </div>
@@ -79,8 +79,8 @@ export default function Sidebar({ isOpen, close }) {
               borderRadius: '10px',
               marginBottom: 5,
               textDecoration: 'none',
-              background: isActive ? 'rgba(37, 99, 235, 0.2)' : 'transparent',
-              color: isActive ? '#3b82f6' : '#aaa',
+              background: isActive ? 'var(--brand-glow, rgba(37, 99, 235, 0.2))' : 'transparent',
+              color: isActive ? 'var(--brand, #3b82f6)' : '#aaa',
               fontWeight: isActive ? 600 : 400,
               fontSize: 15,
               transition: '0.2s',

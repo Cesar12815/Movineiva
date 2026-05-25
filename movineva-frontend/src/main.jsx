@@ -15,7 +15,18 @@ style.innerHTML = `
     user-select: none !important;
     -webkit-user-drag: none !important;
   }
+  :root {
+    --brand: #2563eb;
+    --brand-glow: rgba(37, 99, 235, 0.2);
+  }
   input, textarea { user-select: text !important; }
+  /* Aplicar color dinámico a elementos clave */
+  .btn-primary, button[type="submit"], .active-link, .brand-text {
+    background-color: var(--brand) !important;
+  }
+  .brand-border {
+    border-color: var(--brand) !important;
+  }
   .leaflet-container, .map-screen, .full-map-container {
     outline: none !important;
     border: none !important;

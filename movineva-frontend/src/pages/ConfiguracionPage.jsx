@@ -55,7 +55,11 @@ export default function ConfiguracionPage() {
 
   const updateTheme = (color) => {
     setProfile({ ...profile, config: { ...profile.config, themeColor: color } });
-    document.documentElement.style.setProperty('--brand', color);
+    const root = document.documentElement;
+    root.style.setProperty('--brand', color);
+    root.style.setProperty('--brand-dark', color);
+    root.style.setProperty('--brand-glow', `${color}44`);
+    root.style.setProperty('--brand-subtle', `${color}14`);
   };
 
   if (loading) return <div style={{ padding: 20 }}><Spinner /></div>
