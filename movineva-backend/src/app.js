@@ -50,12 +50,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
 // ─── HEALTH CHECK (Diagnóstico) ────────────────────────────────────────────────
-app.get('/health', async (req, res) => {
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'NeivaPro-Backend', timestamp: new Date() });
+});
+
+app.get('/api/v1/health', async (req, res) => {
   try {
     const { PrismaClient } = require('@prisma/client');
     const prisma = new PrismaClient();
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: 'ok', database: 'connected', version: '1.0.1' });
+    res.json({ status: 'ok', database: 'connected', version: '2.8.5' });
   } catch (err) {
     res.status(500).json({ status: 'error', database: 'disconnected', message: err.message });
   }

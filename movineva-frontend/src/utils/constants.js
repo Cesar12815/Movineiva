@@ -1,19 +1,19 @@
-// 🌐 CONFIGURACIÓN GLOBAL - NEIVA PRO v2.8.0 (HUMANIZED)
+// 🌐 CONFIGURACIÓN GLOBAL - NEIVA PRO v2.8.5
 // -------------------------------------------------------------------------
 
-const GLOBAL_RENDER_URL = 'https://neivapro-global.onrender.com';
+// IMPORTANTE: Verifica que esta URL sea la que aparece en tu Dashboard de Render
+const GLOBAL_RENDER_URL = 'https://neivapro-backend.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
-  const isAndroid = /Android/i.test(navigator.userAgent);
 
-  // 1. En PRODUCCIÓN (Render)
+  // 1. En PRODUCCIÓN (Si el frontend corre en el mismo servidor de Render)
   if (hostname.includes('onrender.com')) {
     return '/api/v1';
   }
 
   // 2. En ANDROID / APK / LOCALHOST
-  // Apuntamos siempre a la nube para que no dependa de tu PC
+  // Forzamos la URL completa del backend de producción
   return `${GLOBAL_RENDER_URL}/api/v1`;
 };
 
