@@ -25,7 +25,7 @@ const RegisterPage = () => {
       if (res.success) {
         // ✅ AUTO-LOGIN: Guardamos los datos y entramos de una vez
         login(res.user, res.token);
-        toast('¡Bienvenido a MoviNeiva!', 'success');
+        toast('¡Bienvenido a NeivaPro!', 'success');
         navigate('/'); // Vamos al mapa directamente
       } else {
         toast(res.message || 'Error en el registro', 'error');
@@ -47,9 +47,9 @@ const RegisterPage = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="logo-section">
-          <span style={{fontSize: '40px'}}>🚌</span>
-          <h1>MoviNeiva</h1>
-          <p>Crea tu cuenta global ahora</p>
+          <span style={{fontSize: '40px'}}>💎</span>
+          <h1>NeivaPro</h1>
+          <p>Únete a la Inteligencia Colectiva</p>
         </div>
 
         <form onSubmit={handleSubmit}>

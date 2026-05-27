@@ -38,9 +38,9 @@ const LoginPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div style={{fontSize: '40px', marginBottom: '10px'}}>🚌</div>
-        <h1>MoviNeiva</h1>
-        <p>Inicia sesión para continuar</p>
+        <div style={{fontSize: '40px', marginBottom: '10px'}}>💎</div>
+        <h1>NeivaPro</h1>
+        <p>Inteligencia Colectiva & Agilidad</p>
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">

@@ -1,6 +1,6 @@
 {
-  "appId": "com.movineva.app",
-  "appName": "Movineva",
+  "appId": "com.neivapro.app",
+  "appName": "NeivaPro",
   "webDir": "dist",
   "server": {
     "androidScheme": "http",

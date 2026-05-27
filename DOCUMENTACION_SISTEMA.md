@@ -1,17 +1,18 @@
-# 🚌 MoviNeiva: Documentación Técnica Integral (ACTUALIZADO)
+# 💎 NeivaPro: Documentación Técnica Integral (ACTUALIZADO)
 
-Este documento detalla la arquitectura, el nuevo sistema de usuarios y la guía de despliegue en la nube para la plataforma **MoviNeiva**.
+Este documento detalla la arquitectura, el sistema de Inteligencia Colectiva y la guía de despliegue en la nube para la plataforma **NeivaPro**.
 
 ---
 
-## 1. Arquitectura y Nuevas Entidades
+## 1. Arquitectura y Enfoque
+NeivaPro evoluciona el concepto de movilidad hacia la **Agilidad Urbana**, utilizando un motor de datos compartidos por la comunidad.
 
 ### 👤 Sistema de Usuarios (Auth)
 Se ha implementado un sistema de autenticación completo para asegurar que solo usuarios registrados puedan acceder a funciones críticas.
 
 - **Modelo User (`users`)**:
     - `id`, `email`, `password` (encriptada con bcrypt), `name`.
-    - `role`: Define si es un usuario estándar (`USER`), domiciliario (`DRIVER`) o administrador (`ADMIN`).
+    - `role`: Define si es un usuario estándar (`USER`), ciudadano pro (`DRIVER`) o administrador (`ADMIN`).
 - **Seguridad**:
     - Uso de **JSON Web Tokens (JWT)** para sesiones seguras.
     - Contraseñas protegidas mediante hashing.
@@ -23,6 +24,7 @@ Se ha implementado un sistema de autenticación completo para asegurar que solo 
 ---
 
 ## 2. Frontend: Flujo de Usuario
+- **Splash Screen**: Experiencia de inicio animada de 2.5s que refuerza la marca "NeivaPro".
 - **AuthContext**: Gestiona el estado de "Sesión Iniciada" en toda la App.
 - **Rutas Protegidas**: Si un usuario no ha iniciado sesión, es redirigido automáticamente a la pantalla de Login.
 - **LocalStorage**: El token de seguridad se guarda localmente para evitar loguearse cada vez que se abra la App.
@@ -64,7 +66,8 @@ Para que la App funcione 24/7 sin tu PC encendida, sigue estos pasos:
 
 - `movineva-backend/src/controllers/authController.js`: Lógica de registro y login.
 - `movineva-frontend/src/context/AuthContext.jsx`: Proveedor global de identidad.
-- `movineva-frontend/src/pages/LoginPage.jsx`: Interfaz de acceso.
+- `movineva-frontend/src/components/common/SplashScreen.jsx`: Pantalla de carga animada.
+- `movineva-frontend/src/pages/LoginPage.jsx`: Interfaz de acceso con nueva identidad.
 
 ---
 
@@ -92,4 +95,4 @@ cd movineva-frontend/android
 `movineva-frontend/android/app/build/outputs/apk/debug/app-debug.apk`
 
 ---
-*MoviNeiva - Sistema de Movilidad Inteligente para Neiva, Huila.*
+*NeivaPro - Inteligencia Humana para la Agilidad Urbana.*

@@ -1,7 +1,7 @@
 {
-  "name": "movineiva-global-monolith",
-  "version": "2.4.1",
-  "description": "Root package for MoviNeiva Global Deployment",
+  "name": "neivapro-global-monolith",
+  "version": "2.8.0",
+  "description": "Root package for NeivaPro Global Deployment",
   "scripts": {
     "build": "npm install --prefix movineva-frontend && npm run build --prefix movineva-frontend && npm install --prefix movineva-backend && npm run prisma:generate --prefix movineva-backend",
     "start": "npm run start --prefix movineva-backend"

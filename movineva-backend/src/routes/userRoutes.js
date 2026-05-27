@@ -77,8 +77,8 @@ router.get('/messages', authenticateToken, async (req, res) => {
         success: true,
         data: [{
           id: 'welcome',
-          title: '🎁 ¡Bienvenido Pro!',
-          content: `Hola compañero, gracias por ser parte de MoviNeiva v2.8.0. \n\nTu clave secreta de seguridad es: ${pin} \n\nÚsala en el perfil para realizar ajustes críticos. ¡Éxitos!`,
+          title: '💎 ¡Bienvenido a NeivaPro!',
+          content: `Hola ciudadano pro, gracias por unirte a la Inteligencia Colectiva de NeivaPro v2.8.0. \n\nTu clave secreta de seguridad es: ${pin} \n\nÚsala en el perfil para realizar ajustes críticos. ¡Éxitos!`,
           type: 'SYSTEM',
           createdAt: new Date()
         }]

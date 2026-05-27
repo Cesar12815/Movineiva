@@ -1,7 +1,7 @@
-// 🌐 CONFIGURACIÓN GLOBAL - MOVI NEIVA v2.8.0 (HUMANIZED)
+// 🌐 CONFIGURACIÓN GLOBAL - NEIVA PRO v2.8.0 (HUMANIZED)
 // -------------------------------------------------------------------------
 
-const GLOBAL_RENDER_URL = 'https://movineiva-global.onrender.com';
+const GLOBAL_RENDER_URL = 'https://neivapro-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
@@ -20,13 +20,13 @@ const getApiBase = () => {
 export const API_BASE = getApiBase();
 export const BASE_URL = GLOBAL_RENDER_URL;
 
-console.log('🚀 [SYSTEM] Conectado a:', API_BASE);
+console.log('🚀 [SYSTEM] NeivaPro Conectado a:', API_BASE);
 
 export const DEVICE_ID = (() => {
-  let id = localStorage.getItem('movineva_device_id');
+  let id = localStorage.getItem('neivapro_device_id');
   if (!id) {
     id = 'user-' + Math.random().toString(36).substring(2, 10);
-    localStorage.setItem('movineva_device_id', id);
+    localStorage.setItem('neivapro_device_id', id);
   }
   return id;
 })();

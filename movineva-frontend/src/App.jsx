@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastProvider } from './context/ToastContext'
 import { AdminProvider }  from './context/AdminContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import MainLayout from './components/layout/MainLayout'
+import SplashScreen from './components/common/SplashScreen'
 
 import MapaPage           from './pages/MapaPage'
 import FavoritosPage      from './pages/FavoritosPage'
@@ -21,6 +23,12 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
   return (
     <ToastProvider>
       <AuthProvider>

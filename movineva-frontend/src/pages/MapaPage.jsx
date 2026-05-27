@@ -309,7 +309,7 @@ export default function MapaPage() {
       setUserCoords(latlng);
       setSheetHeight(45);
       setPlaceName("Identificando...");
-      speak("Analizando punto de entrega.");
+      speak("Analizando punto de inteligencia colectiva.");
 
       // 1. Buscar el sitio mapeado más cercano para dar contexto
       const nearbyRes = await deliveryApi.getNearbySites(latlng.lat, latlng.lng, 100); // Radio pequeño de 100m
@@ -690,9 +690,9 @@ export default function MapaPage() {
           <div className="sheet-content">
             {!userCoords ? (
               <div className="welcome-ui">
-                <div className="badge">NEIVA • LIVE 🟢</div>
-                <h2>Listo para repartir</h2>
-                <p>Usa el buscador para ver fotos de fachadas y ahorrar tiempo en cada entrega.</p>
+                <div className="badge">NEIVA PRO • LIVE 🟢</div>
+                <h2>Inteligencia Colectiva</h2>
+                <p>Usa el radar para visualizar fachadas y puntos críticos mapeados por la comunidad en tiempo real.</p>
                 <div className="quick-chips">
                   <span onClick={handleAgilidadClick} style={{ cursor: 'pointer', background: '#2563eb', color: 'white' }}>🚀 Agilidad</span>
                   <span onClick={() => setIsDarkMode(!isDarkMode)} style={{ cursor: 'pointer' }}>{isDarkMode ? '☀️ Día' : '🌙 Noche'}</span>
@@ -710,7 +710,7 @@ export default function MapaPage() {
               <div className="mapper-ui">
                 <div className="mapper-header">
                   <div>
-                    <span className="tag">REGISTRO DE AGILIDAD</span>
+                    <span className="tag">REGISTRO DE AGILIDAD URBANA</span>
                     <h2>{placeName}</h2>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>

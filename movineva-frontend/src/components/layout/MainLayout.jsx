@@ -59,7 +59,7 @@ export default function MainLayout({ children }) {
           </button>
         )}
 
-        {!isMapPage && <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '18px' }}>MoviNeiva</span>}
+        {!isMapPage && <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '18px' }}>NeivaPro</span>}
       </div>
 
       {/* Menú Lateral */}

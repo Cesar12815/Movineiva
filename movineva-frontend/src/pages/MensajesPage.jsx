@@ -24,7 +24,7 @@ export default function MensajesPage() {
     <div style={{ padding: '0 20px' }}>
       <PageHeader
         title="📩 Buzón Pro"
-        subtitle="Mensajes exclusivos para el equipo MoviNeiva"
+        subtitle="Mensajes exclusivos de la red NeivaPro"
       />
 
       {loading ? (

@@ -45,19 +45,19 @@ export default function Sidebar({ isOpen, close }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 45, height: 45,
-            background: 'var(--brand, #2563eb)',
+            background: 'var(--brand, #38bdf8)',
             borderRadius: 12,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22,
           }}>
-            📦
+            💎
           </div>
           <div>
             <div style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>
-              MoviNeiva
+              NeivaPro
             </div>
-            <div style={{ color: 'var(--brand, #2563eb)', fontSize: 11, fontWeight: 700 }}>
-              {user?.name?.split(' ')[0].toUpperCase() || 'DELIVERY'} PRO
+            <div style={{ color: 'var(--brand, #38bdf8)', fontSize: 11, fontWeight: 700 }}>
+              {user?.name?.split(' ')[0].toUpperCase() || 'USUARIO'} PRO
             </div>
           </div>
         </div>

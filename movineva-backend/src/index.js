@@ -1,5 +1,5 @@
 // src/index.js
-// 🚀 MOVI NEIVA - SISTEMA GLOBAL V1.0.2 (Build Fix)
+// 🚀 NEIVA PRO - SISTEMA GLOBAL V2.8.0
 require('dotenv').config();
 const http = require('http');
 const { Server } = require('socket.io');
@@ -31,15 +31,15 @@ app.set('socketio', io);
 
 // Configuración de Socket.io para tiempo real
 io.on('connection', (socket) => {
-  logger.info(`🔌 Nuevo dispositivo conectado: ${socket.id}`);
+  logger.info(`🔌 Nuevo dispositivo conectado (NeivaPro): ${socket.id}`);
 
   // Unirse a una sala específica (ej: rastreo de un domicilio)
   socket.on('join-tracking', (deliveryId) => {
     socket.join(`tracking-${deliveryId}`);
-    logger.info(`📍 Dispositivo ${socket.id} siguiendo a: ${deliveryId}`);
+    logger.info(`📍 Dispositivo siguiendo a: ${deliveryId}`);
   });
 
-  // Recibir ubicación del domiciliario y retransmitir
+  // Recibir ubicación y retransmitir (Inteligencia Colectiva)
   socket.on('update-location', (data) => {
     // data: { deliveryId, latitude, longitude }
     const { deliveryId, latitude, longitude } = data;
@@ -48,16 +48,15 @@ io.on('connection', (socket) => {
       longitude,
       timestamp: new Date()
     });
-    // Opcional: Podríamos guardar en DB aquí también si es necesario
   });
 
   socket.on('disconnect', () => {
-    logger.info(`❌ Dispositivo desconectado: ${socket.id}`);
+    logger.info(`❌ Dispositivo desconectado de NeivaPro: ${socket.id}`);
   });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  logger.info(`🚌 MoviNeiva Backend corriendo en http://0.0.0.0:${PORT}`);
+  logger.info(`💎 NeivaPro Backend corriendo en http://0.0.0.0:${PORT}`);
   logger.info(`📍 Entorno: ${process.env.NODE_ENV || 'development'}`);
 
   // RF-10: Iniciar scheduler de notificaciones

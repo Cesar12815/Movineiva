@@ -68,7 +68,7 @@ export default function ConfiguracionPage() {
     <div style={{ padding: '0 20px 40px', maxWidth: 600 }}>
       <PageHeader
         title="👤 Mi Perfil Pro"
-        subtitle="Personaliza tu experiencia en MoviNeiva"
+        subtitle="Personaliza tu experiencia en NeivaPro"
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -93,7 +93,7 @@ export default function ConfiguracionPage() {
             </div>
             <div style={{ flex: 1 }}>
               <Input
-                label="Nombre de Domiciliario"
+                label="Nombre de Ciudadano"
                 value={profile.name}
                 onChange={(v) => setProfile({...profile, name: v})}
               />
