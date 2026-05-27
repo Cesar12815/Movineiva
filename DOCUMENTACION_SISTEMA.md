@@ -67,4 +67,29 @@ Para que la App funcione 24/7 sin tu PC encendida, sigue estos pasos:
 - `movineva-frontend/src/pages/LoginPage.jsx`: Interfaz de acceso.
 
 ---
+
+## 5. Guía de Compilación Local (Android)
+
+Para generar el APK de la versión **v2.8.0 ("Humanized")** en entornos con restricciones de red o versiones de Java específicas:
+
+### Entorno Requerido
+- **Java JDK**: 21.0.10.7 o superior.
+- **Gradle**: Configurado para usar el JDK del sistema en `gradle.properties`.
+
+### Solución a Problemas Comunes
+1.  **Errores de Toolchain**: Se ha forzado Java 21 en `build.gradle` y `app/build.gradle` para evitar conflictos con versiones antiguas (Java 17) requeridas por plugins obsoletos.
+2.  **Fallos de Red (Maven Central)**: Si la compilación falla en la tarea `extractDebugAnnotations`, el proyecto está configurado para:
+    - Deshabilitar la tarea automáticamente.
+    - Generar archivos `typedefs.txt` dummy en `intermediates` para saltar la validación de integridad del Android Gradle Plugin.
+
+### Comandos de Compilación
+```powershell
+cd movineva-frontend/android
+./gradlew assembleDebug
+```
+
+### Ubicación del APK
+`movineva-frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+
+---
 *MoviNeiva - Sistema de Movilidad Inteligente para Neiva, Huila.*
