@@ -28,6 +28,7 @@ NeivaPro es una plataforma de inteligencia colectiva diseñada para transformar 
 *   **RNF-02 Performance**: Tiempo de respuesta de la API < 200ms en condiciones normales y compresión de datos `Gzip`.
 *   **RNF-03 Multiplataforma**: Código base unificado mediante **Capacitor 8.0**, garantizando consistencia en Android e iOS.
 *   **RNF-04 Resiliencia**: Build nativo robusto con bypass de validación de red para despliegues en entornos restringidos.
+*   **RNF-05 Accesibilidad Adaptativa**: Interfaz de alto contraste para exteriores y modo de "Mejorador de Resolución" para optimizar la legibilidad en diversos hardware móviles.
 
 ---
 
@@ -40,11 +41,11 @@ NeivaPro es una plataforma de inteligencia colectiva diseñada para transformar 
 *   **Comunicación Tiempo Real**: Socket.io (Engine.io para estabilidad de conexión).
 *   **Infraestructura**: Despliegue en Render (Backend) y Vercel/Static Host (Frontend).
 
-### 3.2 Splash Screen y Experiencia de Usuario
-Se ha implementado una pantalla de carga (Splash Screen) avanzada que:
-*   Refuerza la identidad visual de **NeivaPro**.
-*   Utiliza animaciones fluidas para mejorar la percepción de velocidad.
-*   Oculta los procesos de carga de activos pesados (Mapas/Auth).
+### 3.2 Splash Screen, Accesibilidad y Experiencia de Usuario
+Se ha implementado una capa de experiencia de usuario avanzada que incluye:
+*   **Splash Screen**: Refuerza la identidad visual de **NeivaPro** con animaciones fluidas que ocultan la carga de activos pesados (Mapas/Auth).
+*   **Diseño de Alto Contraste**: Uso de paletas `Slate 900/800` y `Sky 400` para garantizar que las pantallas de autenticación sean legibles incluso bajo luz solar directa en dispositivos móviles.
+*   **Mejorador de Resolución**: Switch dinámico que permite al usuario alternar entre un modo de ahorro de energía y un modo de máxima nitidez visual (High-Res), persistiendo la preferencia en el dispositivo.
 
 ---
 
