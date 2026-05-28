@@ -1,29 +1,43 @@
-// 🌐 CONFIGURACIÓN DE CONEXIÓN - NEIVA PRO v2.9.5
+// 🌐 CONFIGURACIÓN DE CONEXIÓN - NEIVA PRO v2.9.6
 // -------------------------------------------------------------------------
 
 /**
  * IMPORTANTE:
  * Si tu backend en Render tiene un nombre distinto, cámbialo aquí.
- * Ejemplo: 'https://neiva-pro-api.onrender.com'
  */
 const BACKEND_URL = 'https://neivapro-backend.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
-
-  // Si corremos dentro de Render (Web), usamos rutas relativas
-  if (hostname.includes('onrender.com')) {
-    return '/api/v1';
-  }
-
-  // En el CELULAR (APK) forzamos la URL del servidor
+  if (hostname.includes('onrender.com')) return '/api/v1';
   return `${BACKEND_URL}/api/v1`;
 };
 
 export const API_BASE = getApiBase();
 export const BASE_URL = BACKEND_URL;
 
-console.log('🚀 [NEIVAPRO] Sistema de Red conectado a:', API_BASE);
+// ─── CONSTANTES DE SERVICIO ──────────────────────────────────────────
+export const SERVICE_LABELS = {
+  CORRIENTE: 'Bus Corriente',
+  EJECUTIVO: 'Microbús Ejecutivo',
+  NOCTURNO: 'Servicio Nocturno'
+};
+
+export const SERVICE_COLORS = {
+  CORRIENTE: '#3b82f6',
+  EJECUTIVO: '#10b981',
+  NOCTURNO: '#6366f1'
+};
+
+export const SERVICE_ICONS = {
+  CORRIENTE: '🚌',
+  EJECUTIVO: '🚐',
+  NOCTURNO: '🌙'
+};
+
+// ─── UTILIDADES ──────────────────────────────────────────────────────
+export const formatCOP = (val) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
 
 export const DEVICE_ID = (() => {
   let id = localStorage.getItem('neivapro_device_id');

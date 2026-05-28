@@ -1,6 +1,6 @@
 # 🚀 NeivaPro: Documentación Técnica de Proyecto Final
 **Proyecto:** Inteligencia Colectiva y Agilidad Urbana - NeivaPro  
-**Versión:** 2.8.0 ("Humanized")  
+**Versión:** 2.9.6 ("Resilient & Branded")
 **Fecha de Entrega:** Mayo 2026  
 **Estado:** Finalizado / Certificado para Producción  
 
@@ -60,11 +60,11 @@ El sistema utiliza un esquema normalizado que incluye:
 
 ## 5. Estrategia de Compilación y Despliegue
 
-### 5.1 Build de Android (V2.9.0 - Resiliencia y Branding)
-Para superar limitaciones de red y garantizar la integridad de la marca "NeivaPro", se aplicaron las siguientes correcciones en la capa nativa:
-*   **Sincronización de Identidad Nativa**: Refactorización del `namespace` y `applicationId` a `com.neivapro.app` en `build.gradle` y `strings.xml`, eliminando conflictos de instalación.
-*   **Forzado de JDK 21**: Alineación con el toolchain moderno para evitar errores de compilación en entornos con versiones de Java obsoletas.
-*   **Blindaje de Red**: Implementación de `network_security_config.xml` para autorizar explícitamente el tráfico hacia los dominios de Render (`onrender.com`), resolviendo errores de conexión (404/Network Error) en dispositivos Android modernos.
+### 5.1 Build de Android (V2.9.6 - Resiliencia y Branding)
+Para garantizar la integridad de la marca "NeivaPro" y la conectividad total en la nube, se aplicaron las siguientes correcciones:
+*   **Sincronización de Identidad Nativa**: Refactorización del `namespace` y `applicationId` a `com.neivapro.app` en `build.gradle`, `strings.xml` y la estructura de carpetas Java (`com/neivapro/app`), eliminando conflictos de ejecución.
+*   **Blindaje de Red (Anti-404)**: Implementación de `network_security_config.xml` para autorizar explícitamente el tráfico hacia los dominios de Render (`onrender.com`), resolviendo errores de conexión en dispositivos Android 14+.
+*   **Forzado de JDK 21**: Alineación con el toolchain moderno para evitar errores de compilación por incompatibilidad de versiones de Java.
 *   **Auto-dummy Task**: Script de Gradle que genera automáticamente archivos `typedefs.txt` vacíos para saltar validaciones de integridad de red de Maven.
 
 ### 5.2 Comandos Críticos
@@ -86,12 +86,12 @@ Para superar limitaciones de red y garantizar la integridad de la marca "NeivaPr
 1.  **JWT Authentication**: Uso de tokens firmados para cada transacción sensible.
 2.  **Network Security Config**: Blindaje del APK mediante declaración de dominios seguros, evitando ataques de interceptación y asegurando la conectividad exclusiva con el backend de NeivaPro.
 3.  **CORS & Helmet**: Configuración estricta de orígenes y cabeceras de seguridad para prevenir ataques XSS y Clickjacking.
-3.  **Bypass Resiliente**: Aislamiento de las tareas de compilación que requieren red para evitar la exposición de credenciales o fallos por firewalls corporativos.
+4.  **Bypass Resiliente**: Aislamiento de las tareas de compilación que requieren red para evitar la exposición de credenciales o fallos por firewalls corporativos.
 
 ---
 
 ## 8. Conclusión
-NeivaPro v2.8.0 es un producto tecnológico integral que soluciona problemas reales de movilidad y agilidad urbana mediante el uso eficiente de herramientas de software moderno. La arquitectura desacoplada y el uso de tecnologías de vanguardia como Prisma y Capacitor aseguran que el proyecto sea mantenible y escalable para futuras expansiones urbanas.
+NeivaPro v2.9.6 es un producto tecnológico integral que soluciona problemas reales de movilidad y agilidad urbana mediante el uso eficiente de herramientas de software moderno. La arquitectura desacoplada y el uso de tecnologías de vanguardia como Prisma y Capacitor aseguran que el proyecto sea mantenible y escalable para futuras expansiones urbanas.
 
 ---
 *NeivaPro - Inteligencia Humana para la Agilidad Urbana. Todos los derechos reservados 2026.*

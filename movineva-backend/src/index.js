@@ -1,5 +1,5 @@
 // src/index.js
-// 🚀 NEIVA PRO - SISTEMA GLOBAL V2.8.0
+// 🚀 NEIVA PRO - SISTEMA GLOBAL V2.9.6 (Certified Build)
 require('dotenv').config();
 const http = require('http');
 const { Server } = require('socket.io');
