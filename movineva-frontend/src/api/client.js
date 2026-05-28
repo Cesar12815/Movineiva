@@ -1,11 +1,12 @@
 import { API_BASE, DEVICE_ID, SESSION_ID } from '../utils/constants'
 
 async function request(path, options = {}) {
-  // Limpieza de ruta para evitar dobles slashes // que causan 404
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  const url = `${API_BASE}${cleanPath}`.replace(/([^:]\/)\/+/g, "$1");
+  // 1. Construcción de URL segura (Evita el bug del doble slash y no rompe el https://)
+  const baseUrl = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+  const subPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${baseUrl}${subPath}`;
 
-  console.log('📡 [NEIVAPRO_API]:', url);
+  console.log('📡 [NEIVAPRO_API_CALL]:', url);
 
   const token = localStorage.getItem('token');
   const headers = {
@@ -28,8 +29,9 @@ async function request(path, options = {}) {
     if (!res.ok) {
       console.error('❌ [SERVER_ERROR]:', data);
       const errorMsg = data.message || data.error || `Error ${res.status}`;
-      // Diagnóstico ULTRA-DETALLADO para el celular
-      throw new Error(`[${options.method || 'GET'}] ${errorMsg} -> ${url}`);
+      // Esto te dirá en el celular: "[POST] 404 -> https://..."
+      // Así sabrás exactamente a dónde está disparando la app.
+      throw new Error(`[${options.method || 'GET'}] ${res.status} -> ${url}`);
     }
 
     return data;

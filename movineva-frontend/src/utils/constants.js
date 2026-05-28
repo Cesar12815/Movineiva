@@ -2,14 +2,15 @@
 // -------------------------------------------------------------------------
 
 /**
- * IMPORTANTE:
- * Si tu backend en Render tiene un nombre distinto, cámbialo aquí.
+ * URL MAESTRA DE PRODUCCIÓN (RENDER)
  */
-const BACKEND_URL = 'https://neivapro-backend.onrender.com';
+const BACKEND_URL = 'https://neivapro-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
+  // En producción (Web Render), usamos rutas relativas
   if (hostname.includes('onrender.com')) return '/api/v1';
+  // En el CELULAR (APK), forzamos la URL absoluta
   return `${BACKEND_URL}/api/v1`;
 };
 

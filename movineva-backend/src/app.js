@@ -25,15 +25,25 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-// ─── MIDDLEWARES DE SEGURIDAD ─────────────────────────────────────────────────
+// 1. LOG INICIAL (Para ver qué llega desde el celular en Render)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    console.log(`[RECV] ${req.method} ${req.path} - Type: ${req.headers['content-type']}`);
+  }
+  next();
+});
+
+// 2. CONFIGURACIÓN DE SEGURIDAD (CORS MAESTRO)
 app.use(helmet({
-  crossOriginResourcePolicy: false, // Permitir cargar imágenes desde el frontend
+  crossOriginResourcePolicy: false,
 }));
 
 app.use(cors({
-  origin: '*', // Permitir todo en desarrollo para el emulador
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-ID', 'X-Session-ID'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 // Servir archivos estáticos (fotos de clientes)
@@ -68,6 +78,11 @@ app.get('/api/v1/health', async (req, res) => {
 // ─── RUTAS DE LA API ─────────────────────────────────────────────────────────
 const API = '/api/v1';
 
+// Prioridad Máxima: Auth y Users
+app.use(`${API}/auth`, authRoutes);
+app.use(`${API}/users`, userRoutes);
+
+// Resto de rutas
 app.use(`${API}/routes`, routeRoutes);
 app.use(`${API}/stops`, stopRoutes);
 app.use(`${API}/favorites`, favoriteRoutes);
@@ -77,22 +92,30 @@ app.use(`${API}/notifications`, notificationRoutes);
 app.use(`${API}/dataset`, datasetRoutes);
 app.use(`${API}/admin`, adminRoutes);
 app.use(`${API}/delivery`, deliveryRoutes);
-app.use(`${API}/auth`, authRoutes);
-app.use(`${API}/users`, userRoutes);
 
 // ─── SERVIR FRONTEND (ESTÁTICOS) ─────────────────────────────────────────────
 const path = require('path');
-// Servimos la carpeta dist que generará el build del frontend
-app.use(express.static(path.join(__dirname, '../../movineva-frontend/dist')));
+const distPath = path.join(__dirname, '../../movineva-frontend/dist');
 
-// Cualquier ruta que no sea de la API, entrega el index.html del Frontend
+// Middleware para evitar que el 404 de la API entregue el index.html
+app.use(express.static(distPath));
+
 app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api/')) {
-    res.sendFile(path.join(__dirname, '../../movineva-frontend/dist/index.html'));
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ success: false, message: `Endpoint no encontrado: ${req.path}` });
   }
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // ─── MANEJO DE ERRORES (AL FINAL) ─────────────────────────────────────────────
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Ruta de API no encontrada: ${req.method} ${req.originalUrl}`,
+    hint: "Verifica que el endpoint sea /api/v1/auth/register"
+  });
+});
+
 app.use(notFound);
 app.use(errorHandler);
 
