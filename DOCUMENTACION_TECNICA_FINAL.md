@@ -60,10 +60,12 @@ El sistema utiliza un esquema normalizado que incluye:
 
 ## 5. Estrategia de Compilación y Despliegue
 
-### 5.1 Build de Android (V2.8.0 Bypass)
-Para superar limitaciones de red y versiones de Java en el entorno de producción, se implementó una lógica avanzada en `android/build.gradle`:
-*   **Forzado de JDK 21**: Alineación con el toolchain moderno de Android.
-*   **Auto-dummy Task**: El script de Gradle detecta la ausencia de archivos de anotaciones (común en fallos de red de Maven) y genera automáticamente archivos `typedefs.txt` vacíos, permitiendo que la tarea `syncDebugLibJars` finalice exitosamente sin intervención manual.
+### 5.1 Build de Android (V2.9.0 - Resiliencia y Branding)
+Para superar limitaciones de red y garantizar la integridad de la marca "NeivaPro", se aplicaron las siguientes correcciones en la capa nativa:
+*   **Sincronización de Identidad Nativa**: Refactorización del `namespace` y `applicationId` a `com.neivapro.app` en `build.gradle` y `strings.xml`, eliminando conflictos de instalación.
+*   **Forzado de JDK 21**: Alineación con el toolchain moderno para evitar errores de compilación en entornos con versiones de Java obsoletas.
+*   **Blindaje de Red**: Implementación de `network_security_config.xml` para autorizar explícitamente el tráfico hacia los dominios de Render (`onrender.com`), resolviendo errores de conexión (404/Network Error) en dispositivos Android modernos.
+*   **Auto-dummy Task**: Script de Gradle que genera automáticamente archivos `typedefs.txt` vacíos para saltar validaciones de integridad de red de Maven.
 
 ### 5.2 Comandos Críticos
 *   **Web Build**: `npm run build`
@@ -82,7 +84,8 @@ Para superar limitaciones de red y versiones de Java en el entorno de producció
 
 ## 7. Seguridad y Protección de Datos
 1.  **JWT Authentication**: Uso de tokens firmados para cada transacción sensible.
-2.  **CORS & Helmet**: Configuración estricta de orígenes y cabeceras de seguridad para prevenir ataques XSS y Clickjacking.
+2.  **Network Security Config**: Blindaje del APK mediante declaración de dominios seguros, evitando ataques de interceptación y asegurando la conectividad exclusiva con el backend de NeivaPro.
+3.  **CORS & Helmet**: Configuración estricta de orígenes y cabeceras de seguridad para prevenir ataques XSS y Clickjacking.
 3.  **Bypass Resiliente**: Aislamiento de las tareas de compilación que requieren red para evitar la exposición de credenciales o fallos por firewalls corporativos.
 
 ---

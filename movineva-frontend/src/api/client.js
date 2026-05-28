@@ -1,9 +1,11 @@
 import { API_BASE, DEVICE_ID, SESSION_ID } from '../utils/constants'
 
 async function request(path, options = {}) {
-  const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
+  // Limpieza de ruta para evitar dobles slashes // que causan 404
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${API_BASE}${cleanPath}`.replace(/([^:]\/)\/+/g, "$1");
 
-  console.log('📡 [API_CALL]:', url);
+  console.log('📡 [NEIVAPRO_API]:', url);
 
   const token = localStorage.getItem('token');
   const headers = {
@@ -25,7 +27,9 @@ async function request(path, options = {}) {
 
     if (!res.ok) {
       console.error('❌ [SERVER_ERROR]:', data);
-      throw new Error(data.message || data.error || `Error ${res.status}`);
+      const errorMsg = data.message || data.error || `Error ${res.status}`;
+      // Diagnóstico ULTRA-DETALLADO para el celular
+      throw new Error(`[${options.method || 'GET'}] ${errorMsg} -> ${url}`);
     }
 
     return data;
