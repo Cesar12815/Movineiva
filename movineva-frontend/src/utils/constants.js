@@ -4,7 +4,7 @@
 /**
  * URL MAESTRA DE PRODUCCIÓN (RENDER)
  */
-const BACKEND_URL = 'https://neivapro-global.onrender.com';
+const BACKEND_URL = 'https://movineiva-global.onrender.com';
 
 const getApiBase = () => {
   const hostname = window.location.hostname;
