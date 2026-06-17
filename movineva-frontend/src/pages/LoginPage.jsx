@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { DEVICE_ID } from '../utils/constants';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -27,10 +28,17 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await authApi.login({ email, password });
+      // Enviamos el DEVICE_ID para asegurar exclusividad y persistencia
+      const res = await authApi.login({ email, password, deviceId: DEVICE_ID });
       if (res.success) {
         login(res.user, res.token);
-        toast('¡Bienvenido de nuevo!', 'success');
+
+        if (res.user.isPremium) {
+          toast(`✨ VIP: Prioridad de pedidos activada`, 'success');
+        } else {
+          toast('¡Bienvenido de nuevo!', 'success');
+        }
+
         navigate('/');
       } else {
         toast(res.message || 'Error en credenciales', 'error');

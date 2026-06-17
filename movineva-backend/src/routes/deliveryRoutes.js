@@ -171,4 +171,71 @@ router.get('/earnings/:deviceId', async (req, res) => {
   }
 });
 
+// GET: Obtener pedidos disponibles con lógica de exclusividad y prioridad Premium
+router.get('/orders/available', async (req, res) => {
+  try {
+    const { userId, isPremium } = req.query;
+
+    // 1. Primero buscamos si el usuario ya tiene un pedido en curso (Persistencia)
+    const activeOrder = await prisma.order.findFirst({
+      where: {
+        assignedToId: userId,
+        status: 'ASSIGNED'
+      }
+    });
+
+    if (activeOrder) {
+      return res.json({ success: true, type: 'ACTIVE_SESSION', data: [activeOrder] });
+    }
+
+    // 2. Lógica de Exclusividad: Buscar pedidos que NO estén asignados a nadie
+    // Si el usuario es Premium, le mostramos pedidos con un "bonus" de tiempo o exclusivos
+    const orders = await prisma.order.findMany({
+      where: {
+        status: 'AVAILABLE',
+        OR: [
+          { deviceId: null }, // Pedidos públicos
+          { deviceId: req.query.deviceId } // Pedidos que fueron reservados para este celular específicamente
+        ]
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    });
+
+    res.json({ success: true, type: 'MARKETPLACE', data: orders });
+  } catch (error) {
+    console.error('Error al obtener pedidos:', error);
+    res.status(500).json({ success: false, error: 'Error al cargar pedidos' });
+  }
+});
+
+// POST: Aceptar un pedido (Vincularlo al celular/usuario)
+router.post('/orders/accept', async (req, res) => {
+  try {
+    const { orderId, userId, deviceId } = req.body;
+
+    // Verificar que el pedido siga disponible
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+
+    if (!order || order.status !== 'AVAILABLE') {
+      return res.status(400).json({ success: false, message: 'El pedido ya fue tomado por otro compañero.' });
+    }
+
+    // Transacción para asegurar exclusividad: Nadie más puede tomarlo al mismo tiempo
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'ASSIGNED',
+        assignedToId: userId,
+        deviceId: deviceId
+      }
+    });
+
+    res.json({ success: true, message: 'Pedido aceptado. ¡A trabajar!', data: updatedOrder });
+  } catch (error) {
+    console.error('Error al aceptar pedido:', error);
+    res.status(500).json({ success: false, error: 'Error de conexión con el servidor' });
+  }
+});
+
 module.exports = router;

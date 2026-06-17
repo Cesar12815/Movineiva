@@ -10,7 +10,7 @@ const generateToken = (user) => {
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, deviceId } = req.body;
     if (!email || !password || !name) {
       return res.status(400).json({ success: false, message: 'Faltan datos obligatorios' });
     }
@@ -18,25 +18,26 @@ exports.register = async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // REGISTRO RESILIENTE: Solo usamos campos que existen 100% en la tabla users
-    // Si la DB es vieja, no fallará por falta de columnas nuevas
+    // REGISTRO CON SOPORTE PARA PREMIUM DEMO Y DEVICE ID
     const user = await prisma.user.create({
       data: {
         email: cleanEmail,
         password: hashedPassword,
-        name: name.trim()
+        name: name.trim(),
+        deviceId: deviceId || null,
+        isPremium: true,      // Activamos Premium por defecto para el Demo
+        premiumLevel: 1,     // Nivel 1: Demo Testing
       }
     });
 
-    // Intentamos guardar el PIN en segundo plano, si la DB no tiene la columna, no pasa nada
     const secretPin = Math.floor(1000 + Math.random() * 9000).toString();
     try {
       await prisma.user.update({
         where: { id: user.id },
-        data: { secretPin, config: { themeColor: '#2563eb', voiceVolume: 0.8, alertVolume: 1.0 } }
+        data: { secretPin, config: { themeColor: '#ffd700', voiceVolume: 0.9, alertVolume: 1.0 } }
       });
     } catch (e) {
-      console.log("⚠️ DB antigua: no se pudo guardar secretPin/config");
+      console.log("⚠️ Error al actualizar config inicial");
     }
 
     const token = generateToken(user);
@@ -47,46 +48,41 @@ exports.register = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        secretPin: secretPin,
-        config: { themeColor: '#2563eb', voiceVolume: 0.8, alertVolume: 1.0 }
+        isPremium: true,
+        premiumLevel: 1,
+        deviceId: user.deviceId,
+        secretPin: secretPin
       }
     });
   } catch (error) {
     console.error("Auth Error:", error);
-    res.status(500).json({ success: false, message: 'Error interno al registrar. Verifica tu conexión.' });
+    res.status(500).json({ success: false, message: 'Error al registrar. El correo o dispositivo ya podrían estar en uso.' });
   }
 };
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, deviceId } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, message: 'Faltan credenciales' });
 
-    // SELECT SEGURO: Solo pedimos campos que existen físicamente en la DB de Render
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
-      select: { id: true, email: true, password: true, name: true, role: true }
+      select: {
+        id: true, email: true, password: true, name: true, role: true,
+        isPremium: true, premiumLevel: true, deviceId: true
+      }
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ success: false, message: 'Correo o clave incorrectos' });
     }
 
-    // Intentar obtener PIN y Config por separado.
-    // Si falla (porque la DB no tiene las columnas), devolvemos valores Pro por defecto.
-    let extra = { secretPin: '1234', config: { themeColor: '#2563eb', voiceVolume: 0.8, alertVolume: 1.0 } };
-    try {
-      const dbExtra = await prisma.user.findUnique({
+    // Si el usuario no tiene deviceId guardado, lo vinculamos en este login
+    if (deviceId && !user.deviceId) {
+      await prisma.user.update({
         where: { id: user.id },
-        select: { secretPin: true, config: true }
+        data: { deviceId }
       });
-      if (dbExtra) {
-        extra.secretPin = dbExtra.secretPin || extra.secretPin;
-        // Mezclamos con defaults para asegurar que campos nuevos existan
-        extra.config = { ...extra.config, ...(dbExtra.config || {}) };
-      }
-    } catch (e) {
-      console.log("⚠️ DB antigua: usando configuración Pro por defecto");
     }
 
     const token = generateToken(user);
@@ -94,9 +90,13 @@ exports.login = async (req, res) => {
       success: true,
       token,
       user: {
-        ...user,
-        secretPin: extra.secretPin,
-        config: extra.config
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isPremium: user.isPremium,
+        premiumLevel: user.premiumLevel,
+        deviceId: deviceId || user.deviceId
       }
     });
   } catch (error) {
