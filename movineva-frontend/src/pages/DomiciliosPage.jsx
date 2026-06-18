@@ -30,6 +30,8 @@ const DomiciliosPage = () => {
   });
 
   const [recentDeliveries, setRecentDeliveries] = useState([]);
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [activeOrder, setActiveOrder] = useState(null);
 
   const [communityNews, setCommunityNews] = useState([]);
 
@@ -63,9 +65,10 @@ const DomiciliosPage = () => {
     if (!silent) setLoading(true);
     setError(null);
     try {
-      const [sitesRes, reportsRes] = await Promise.all([
+      const [sitesRes, reportsRes, ordersRes] = await Promise.all([
         deliveryApi.searchSites(searchName),
-        reportsApi.getNearby(2.9333, -75.2872)
+        reportsApi.getNearby(2.9333, -75.2872),
+        deliveryApi.getAvailableOrders(authUser?.id, authUser?.isPremium, deviceId)
       ]);
 
       setSites(Array.isArray(sitesRes.data) ? sitesRes.data : []);
@@ -77,6 +80,17 @@ const DomiciliosPage = () => {
           msg: r.description,
           user: r.userName || 'Compañero'
         })));
+      }
+
+      // Procesar Pedidos (Exclusividad y Persistencia)
+      if (ordersRes.success) {
+        if (ordersRes.type === 'ACTIVE_SESSION') {
+          setActiveOrder(ordersRes.data[0]);
+          setAvailableOrders([]);
+        } else {
+          setAvailableOrders(ordersRes.data);
+          setActiveOrder(null);
+        }
       }
 
       // Cargar ganancias reales
@@ -97,7 +111,22 @@ const DomiciliosPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchName, deviceId]);
+  }, [searchName, deviceId, authUser]);
+
+  const handleAcceptOrder = async (orderId) => {
+    try {
+      const res = await deliveryApi.acceptOrder(orderId, authUser.id, deviceId);
+      if (res.success) {
+        toast("Pedido aceptado. ¡Mucha suerte!", "success");
+        speak("Pedido confirmado. Iniciando navegación hacia el cliente.");
+        fetchData(true);
+      } else {
+        toast(res.message, "error");
+      }
+    } catch (e) {
+      toast("Error al aceptar el pedido", "error");
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -162,14 +191,55 @@ const DomiciliosPage = () => {
     <div className={`pro-container ${tracking ? 'on-duty' : ''}`}>
       <header className="pro-header">
         <div className="user-info">
-          <div className="avatar">DP</div>
+          <div className="avatar" style={{ border: authUser?.isPremium ? '2px solid #ffd700' : 'none' }}>
+            {authUser?.isPremium ? '💎' : 'DP'}
+          </div>
           <div>
-            <h1>Panel de Control</h1>
+            <h1>Panel de Control {authUser?.isPremium && <span className="premium-label">PREMIUM</span>}</h1>
             <span className="rank-tag">{stats.rank}</span>
           </div>
         </div>
         <button className="btn-map-fab" onClick={() => navigate('/')}>📍 IR AL RADAR</button>
       </header>
+
+      {/* SECCIÓN DE PEDIDOS EXCLUSIVOS (PREMIUM) */}
+      <section className="orders-section">
+        <div className="section-header">
+          <h2>{activeOrder ? '📍 PEDIDO EN CURSO' : '📦 PEDIDOS DISPONIBLES'}</h2>
+          {authUser?.isPremium && <span className="priority-badge">Prioridad Alta</span>}
+        </div>
+
+        {activeOrder ? (
+          <div className="active-order-card">
+            <div className="order-info">
+              <h3>{activeOrder.customerName}</h3>
+              <p>📍 {activeOrder.address}</p>
+              <div className="order-amount">${parseFloat(activeOrder.amount).toLocaleString()}</div>
+            </div>
+            <button className="btn-navigate" onClick={() => navigate('/', { state: { targetOrder: activeOrder } })}>
+              CONTINUAR RUTA
+            </button>
+          </div>
+        ) : (
+          <div className="orders-list">
+            {availableOrders.length === 0 && (
+              <p className="empty-text">Buscando nuevos pedidos en Neiva...</p>
+            )}
+            {availableOrders.map(order => (
+              <div key={order.id} className="order-card-mini">
+                <div className="order-details">
+                  <strong>{order.customerName}</strong>
+                  <span>{order.address}</span>
+                </div>
+                <div className="order-actions">
+                  <span className="amount-pill">${parseFloat(order.amount).toLocaleString()}</span>
+                  <button className="btn-accept" onClick={() => handleAcceptOrder(order.id)}>TOMAR</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* DASHBOARD DE RENDIMIENTO (Totalmente Pro) */}
       <section className="dashboard">
@@ -275,8 +345,29 @@ const DomiciliosPage = () => {
         .pro-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .user-info { display: flex; gap: 12px; align-items: center; }
         .avatar { width: 45px; height: 45px; background: #111; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
-        .pro-header h1 { font-size: 18px; font-weight: 900; margin: 0; color: #1e293b; }
+        .pro-header h1 { font-size: 18px; font-weight: 900; margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        .premium-label { font-size: 9px; background: linear-gradient(to right, #ffd700, #f59e0b); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
         .rank-tag { font-size: 10px; font-weight: 800; background: #f59e0b; color: #fff; padding: 2px 8px; border-radius: 5px; }
+
+        /* Estilos Pedidos Premium */
+        .orders-section { margin-bottom: 25px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .section-header h2 { font-size: 12px; font-weight: 900; color: #1e293b; margin: 0; }
+        .priority-badge { font-size: 10px; color: #f59e0b; font-weight: 800; text-transform: uppercase; }
+
+        .active-order-card { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-left: 5px solid #38bdf8; }
+        .active-order-card h3 { margin: 0; font-size: 18px; }
+        .active-order-card p { font-size: 13px; color: #94a3b8; margin: 5px 0 15px 0; }
+        .order-amount { font-size: 24px; font-weight: 900; color: #38bdf8; margin-bottom: 15px; }
+        .btn-navigate { width: 100%; padding: 12px; border-radius: 12px; border: none; background: #38bdf8; color: #000; font-weight: 800; font-size: 14px; }
+
+        .order-card-mini { background: #fff; padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+        .order-details { display: flex; flex-direction: column; gap: 2px; }
+        .order-details strong { font-size: 14px; color: #1e293b; }
+        .order-details span { font-size: 11px; color: #64748b; }
+        .order-actions { display: flex; align-items: center; gap: 10px; }
+        .amount-pill { font-size: 13px; font-weight: 800; color: #166534; background: #dcfce7; padding: 4px 10px; border-radius: 10px; }
+        .btn-accept { padding: 8px 15px; border-radius: 12px; border: none; background: #2563eb; color: #fff; font-weight: 800; font-size: 12px; }
         .btn-map-fab { background: #111; color: #fff; border: none; padding: 10px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
 
         .dashboard { background: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }

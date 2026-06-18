@@ -18,5 +18,12 @@ export const deliveryApi = {
   },
   getEarnings: async (deviceId) => {
     return apiClient.get(`/delivery/earnings/${deviceId}`);
+  },
+  // Nuevos endpoints para pedidos exclusivos y premium
+  getAvailableOrders: async (userId, isPremium, deviceId) => {
+    return apiClient.get(`/delivery/orders/available?userId=${userId}&isPremium=${isPremium}&deviceId=${deviceId}`);
+  },
+  acceptOrder: async (orderId, userId, deviceId) => {
+    return apiClient.post('/delivery/orders/accept', { orderId, userId, deviceId });
   }
 };
